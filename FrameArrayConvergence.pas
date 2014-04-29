@@ -4,13 +4,13 @@ unit FrameArrayConvergence;
 FrameArrayConvergence.pas/dfm
 -----------------------------
 Begin: 2005/08/01
-Last revision: $Date: 2013-06-27 19:11:22 $ $Author: areeves $
-Version number: $Revision: 1.3.10.1 $
+Last revision: $Date: 2009-04-17 05:07:30 $ $Author: areeves $
+Version number: $Revision: 1.3 $
 Project: APHI Delphi Library for Simulation Modeling
 Website: http://www.naadsm.org/opensource/libaphi/
 Author: Aaron Reeves <Aaron.Reeves@ucalgary.ca>
 --------------------------------------------------
-Copyright (C) 2005 - 2008 Colorado State University
+Copyright (C) 2005 - 2008 Animal Population Health Institute, Colorado State University
 
 This program is free software; you can redistribute it and/or modify it under the terms of the GNU General
 Public License as published by the Free Software Foundation; either version 2 of the License, or

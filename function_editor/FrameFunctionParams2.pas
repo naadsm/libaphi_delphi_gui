@@ -4,13 +4,13 @@ unit FrameFunctionParams2;
 FrameFunctionParams2.pas/dfm
 ----------------------------
 Begin: 2005/11/10
-Last revision: $Date: 2013-06-27 19:11:23 $ $Author: areeves $
-Version number: $Revision: 1.23.4.10 $
+Last revision: $Date: 2011-10-28 17:15:22 $ $Author: areeves $
+Version number: $Revision: 1.26.6.7 $
 Project: APHI Delphi Library for Simulation Modeling
 Website: http://www.naadsm.org/opensource/libaphi/
 Author: Aaron Reeves <Aaron.Reeves@ucalgary.ca>
 --------------------------------------------------
-Copyright (C) 2005 - 2010 Colorado State University
+Copyright (C) 2005 - 2010 Animal Population Health Institute, Colorado State University
 
 This program is free software; you can redistribute it and/or modify it under the terms of the GNU General
 Public License as published by the Free Software Foundation; either version 2 of the License, or
