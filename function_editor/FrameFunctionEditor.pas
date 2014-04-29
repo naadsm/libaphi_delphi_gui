@@ -4,13 +4,13 @@ unit FrameFunctionEditor;
 FrameFunctionEditor.pas/dfm
 ---------------------------
 Begin: 2006/01/04
-Last revision: $Date: 2008/11/25 22:05:57 $ $Author: areeves $
-Version number: $Revision: 1.1 $
-Project: NAADSM and related applications
-Website: http://www.naadsm.org
-Author: Aaron Reeves <Aaron.Reeves@colostate.edu>
+Last revision: $Date: 2013-06-27 19:11:22 $ $Author: areeves $
+Version number: $Revision: 1.19.4.12 $
+Project: APHI Delphi Library for Simulation Modeling
+Website: http://www.naadsm.org/opensource/libaphi/
+Author: Aaron Reeves <Aaron.Reeves@ucalgary.ca>
 --------------------------------------------------
-Copyright (C) 2006 - 2008 Animal Population Health Institute, Colorado State University
+Copyright (C) 2006 - 2011 Colorado State University
 
 This program is free software; you can redistribute it and/or modify it under the terms of the GNU General
 Public License as published by the Free Software Foundation; either version 2 of the License, or
@@ -18,9 +18,12 @@ Public License as published by the Free Software Foundation; either version 2 of
 *)
 
 
+{$INCLUDE Defs.inc}
+
 interface
 
   uses
+    // Standard Delphi units
     Windows,
     Messages,
     SysUtils,
@@ -32,8 +35,10 @@ interface
     Dialogs,
     StdCtrls,
 
+    // APHI Delphi Library for Simulation Modeling
     Models,
     ChartFunction,
+    ProbDensityFunctions,
     FunctionDictionary,
     FunctionEnums
   ;
@@ -69,7 +74,7 @@ interface
     The user may alter (edit) the selected function, or create a brand new one.  The user may clear the current
     selection, or remove the current selection from the list entirely.
 
-    Instances of TFrameFunctionEditor work with instances of FormChartPointsEditor2.  It is the form
+    Instances of TFrameFunctionEditor work with instances of TFormFunctionEditor.  It is the form
     that provides the graphical interface for manipulating the functions themselves.
 
     // FIX ME: This paragraph is no longer correct.
@@ -122,6 +127,7 @@ interface
       // For internal use
       _editing: boolean;
       _creating: boolean;
+      _useLblDisabled: boolean;
 
       _myForm: TForm;
 
@@ -134,17 +140,21 @@ interface
       _nameLocked: boolean;
       _nameAlwaysVisible: boolean;
       _xUnits: TChartUnitType;
+      _xUnitsLabel: string;
       _yUnits: TChartUnitType;
       _minY: double;
       _maxY: double;
+      _readOnly: boolean;
+
+      _allowedPdfTypes: TPdfTypeSet;
 
       { The selected chart.  Nil if no chart is selected. }
     	_chartFn: TChartFunction;
 
-      { The thing (e.g. production type or prod type pair) that has a chart as a parameter. }
+      { The model that has a chart as a parameter. }
       _model: TModelWithFunctions;
 
-      { The list of things, the members of which might have the chart as a parameter. }
+      { A list of models, the members of which might have the chart as a parameter. }
       _modelList: TModelList;
 
       { The application-specific data structure that keeps track of all functions in the simulation. }
@@ -169,6 +179,8 @@ interface
 
       procedure updateAppDisplayForChartChange( fn: TChartFunction ); virtual;
       procedure updateAppDisplay(); virtual;
+      
+      procedure setDefaultButtonEnabling();
 
       procedure setAdditionalInfo( val: integer );
 
@@ -200,15 +212,22 @@ interface
       // Properties passed through to the chart points editor when necessary
       procedure setUnitsLocked( val: boolean );
       procedure setXUnits( val: TChartUnitType );
+      procedure setXUnitsLabel( val: string );
       procedure setYUnits( val: TChartUnitType );
       procedure setMinY( val: double );
       procedure setMaxY( val: double );
 
       function getUnitsLocked(): boolean;
       function getXUnits(): TChartUnitType;
+      function getXUnitsLabel(): string;
       function getYUnits(): TChartUnitType;
       function getMinY(): double;
       function getMaxY(): double;
+
+      function getAllowedPdfTypes(): TPdfTypeSet;
+      procedure setAllowedPdfTypes( s: TPdfTypeSet );
+
+      procedure setReadOnly( const val: boolean );
 
     public
       constructor create( AOwner: TComponent ); override;
@@ -225,16 +244,20 @@ interface
 
       { Property-like functions }
       procedure setModelList(  list: TModelList );
-      procedure setFunctionDict( list: TFunctionDictionary );
+      procedure setFunctionDict( dict: TFunctionDictionary );
       procedure setChartField( ch: TSMChart );
 
+      procedure showChart(); overload;
+      procedure showChart( const fnName: string ); overload;
       { Shortcut for setting _model, _chartFn, and _whichChart all at once. }
-      procedure showChart( p: TModelWithFunctions; c: TChartFunction; ch: TSMChart );
+      procedure showChart( m: TModelWithFunctions; fn: TChartFunction; ch: TSMChart ); overload;
 
       property additionalInfo: integer write setAdditionalInfo;
 
       // Properties of this object
       property enabled: boolean read getEnabled write setEnabled;
+      property showDisabledLabel: boolean read _useLblDisabled write _useLblDisabled;
+
       property chartType: TChartType read getChartType write setChartType;
 
       property ptrUpdateAppDisplayForChartChange: TAppUpdatePtr write _ptrUpdateAppDisplayForChartChange;
@@ -243,10 +266,23 @@ interface
       // Properties passed through to the chart points editor when necessary
       property unitsLocked: boolean read getUnitsLocked write setUnitsLocked;
       property xUnits: TChartUnitType read getXUnits write setXUnits;
+      property xUnitsLabel: string read getXUnitsLabel write setXUnitsLabel;
       property yUnits: TChartUnitType read getYUnits write setYUnits;
       property minY: double read getMinY write setMinY;
       property maxY: double read getMaxY write setMaxY;
+      property isReadOnly: boolean read _readOnly write setReadOnly;
 
+      property chart: TChartFunction read _chartFn;
+      property fn: TChartFunction read _chartFn;
+
+      // FIX ME: Right now, this property MUST be set before this object can be used.
+      // It isn't smart enough to figure out what to do if the set of allowed types changes
+      // when a function is already specified.
+      property allowedPdfTypes: TPdfTypeSet read getAllowedPdfTypes write setAllowedPdfTypes;
+      procedure allowPdfTypesAll();
+      procedure allowPdfTypesContinuous();
+      procedure allowPdfTypesDiscrete();
+      procedure allowPdfTypesContinuousBounded();
     end
   ;
 
@@ -257,16 +293,14 @@ implementation
 
   uses
     MyStrUtils,
-    GuiStrUtils,
     DebugWindow,
     ControlUtils,
     MyDialogs,
     I88n,
 
-    ProbDensityFunctions,
     RelFunction,
 
-    FormChartPointsEditor2
+    FormFunctionEditor
   ;
 
   const
@@ -281,6 +315,7 @@ implementation
       translateUI();
 
       _modelList := nil;
+      _model := nil;
 
       _ptrUpdateAppDisplayForChartChange := nil;
       _ptrUpdateAppDisplay := nil;
@@ -289,6 +324,10 @@ implementation
       _myForm := nil;
       _unitsLocked := true;
       _nameAlwaysVisible := false;
+      _useLblDisabled := true;
+      _readOnly := false;
+
+      allowPdfTypesAll(); // Start with an complete set, unless specified later.
 
       lblFunctionDescr.Caption := tr( '(No function is selected)' );
 
@@ -360,6 +399,34 @@ implementation
       oldChartName: string;
       newChartName: string;
 
+      { Used to determine whether a legtimate existing function has the same name as a new function. }
+      function duplicateNameExists( const chartName: string ): boolean;
+        var
+          i: integer;
+          fn: TFunctionDictionaryItem;
+          fnName: string;
+        begin
+          result := false;
+
+          for i := 0 to _functionDict.count - 1 do
+            begin
+              fnName := _functionDict.keyAtIndex( i );
+              if( lower( chartName ) = lower( fnName ) ) then
+                begin
+                  fn := _functionDict.itemAtIndex( i ) as TFunctionDictionaryItem;
+                  if( not( fn.removed ) ) then
+                    begin
+                      result := true;
+                      break;
+                    end
+                  ;
+                end
+              ;
+            end
+          ;
+        end
+      ;
+
       { Used to obtain a unique name for the newly created/edited chart. }
       function getUniqueNameOK( var chartName: string ): boolean;
         var
@@ -376,7 +443,7 @@ implementation
 
           if( mrCancel = dlgValue ) then
             result := false
-          else if( _functionDict.contains( chartName ) ) then
+          else if( duplicateNameExists( chartName ) ) then
             result := getUniqueNameOK( chartName )
           else
             result := true
@@ -405,7 +472,7 @@ implementation
           //--------------------------------
           newChartName := cht.name;
 
-          if( _functionDict.contains( cht.name ) ) then
+          if( duplicateNameExists( cht.name ) ) then
             begin
               // The newly entered function name is a duplicate and is not allowed.
               // Get a legitimate new name, and move on.
@@ -427,20 +494,26 @@ implementation
           //-----------------------------------------------
           tmpItem := TFunctionDictionaryItem.create( cht );
           tmpItem.new := true;
-          tmpItem.incrRefCounter();
           _functionDict.insert( cht.name, tmpItem );
 
-          // Change the selected chart field in the current thing
+          // Change the selected chart field in the current model,
+          // if there is one. Otherwise, just show the chart.
           //-----------------------------------------------------
-          if( nil <> _model.chart( _whichChart, _addlInfo ) ) then
-          	begin
-            	_model.removeChart( cboChartList.items.strings[cboChartList.itemIndex] );
-              if( nil <> _functionDict.value( cboChartList.items.strings[cboChartList.itemIndex] ) ) then
-          		  _functionDict.value( cboChartList.items.strings[cboChartList.itemIndex] ).decrRefCounter()
+          if( nil <> _model ) then
+            begin
+              if( nil <> _model.chart( _whichChart, _addlInfo ) ) then
+                begin
+                  _model.removeChart( cboChartList.items.strings[cboChartList.itemIndex] );
+                  if( nil = _functionDict.value( cboChartList.items.strings[cboChartList.itemIndex] ) ) then
+                    raise exception.Create( '_functionDict.value for name ' + cboChartList.items.strings[cboChartList.itemIndex] + ' is nil in TFrameFunctionEditor.editDone()' )
+                  ;
+                end
               ;
+              _model.setChart( _whichChart, cht, _addlInfo );
             end
+          else
+            _chartFn := cht
           ;
-          _model.setChart( _whichChart, cht, _addlInfo );
         end
       else if( _editing ) then // An existing chart was changed
       	begin
@@ -453,10 +526,20 @@ implementation
             // Everything is fine.  Just move along.
           else
             begin
-              if( not( _functionDict.contains( newChartName ) ) ) then
+              if( not( duplicateNameExists( newChartName ) ) ) then
                 begin
                   // The new name is OK.
                   // Change the name in the dictionary and move on.
+                  dbcout( '*** Renaming function dictionary item (' + oldChartName + ')', true );
+
+                  // After renaming, the old chart name won't exist in the dictionary any more.
+                  // That will cause a problem when the model or model list go to update reference counters:
+                  // the "old" function counter can't be decremented, but the "new" function counter will be
+                  // incremented.  Since "new" and "old" are actually the same function, double-counting will
+                  // occur.  For that reason, the reference counter for the "old" function should be zeroed
+                  // out before the function is renamed.
+                  _functionDict.value( oldChartName ).resetRefCounter();
+
                   _functionDict.Rename( oldChartName, newChartName );
                 end
               else
@@ -466,6 +549,10 @@ implementation
                   if( getUniqueNameOK( newChartName ) ) then
                     begin
                       cht.name := newChartName;
+
+                      // See comment above.
+                      _functionDict.value( oldChartName ).resetRefCounter();
+
                       _functionDict.Rename( oldChartName, newChartName );
                     end
                   else // The *&$%#& user cancelled the name dialog box.
@@ -482,10 +569,7 @@ implementation
           // and in the current model.
           //----------------------------------------------
         	cht.id := _functionDict.value( newChartName ).fn.id;
-          newItem := TFunctionDictionaryItem.create( cht );
-          newItem.refCounter := _functionDict.value( newChartName ).refCounter;
-
-          dbcout( 'Chart is used ' + intToStr( newItem.refCounter ) + ' times', DBSHOWMSG );
+          newItem := TFunctionDictionaryItem.create( cht, _functionDict.value( cht.name ).refCounter );
 
           dbcout( 'Replacing existing chart ' + newChartName, DBSHOWMSG );
           // Was the existing chart newly created? (see below)
@@ -494,7 +578,7 @@ implementation
           dbcout( 'Freeing old chart ' + newChartName, DBSHOWMSG );
           _functionDict.delete( cht.name );
 
-          dbcout( 'Creating new chart ' + newChartName, DBSHOWMSG );
+          dbcout( 'Inserting new chart ' + newChartName, DBSHOWMSG );
           _functionDict.insert( cht.name, newItem );
 
           // If the changed chart was new, it is still new.
@@ -513,33 +597,16 @@ implementation
 
           if( nil <> _modelList ) then
             _modelList.changeChart( _whichChart, oldChartName, cht, _addlInfo )
-          else
-            //raise exception.create( '_modelList is nil in TFrameSMFunctionEditor.editDone' )
-            // The line above is obsolete, now FrameFunctionEditor can operate on only a single model.
+          else if( nil <> _model ) then
             _model.changeChart( _whichChart, oldChartName, cht, _addlInfo )
+          else
+            _chartFn := cht
           ;
         end
       ;
 
       dbcout( '--- Updating master display...', DBSHOWMSG );
       updateAppDisplay();
-
-      (*
-      // THE PREVIOUS VERSION OF THIS FUNCTION:
-      showMessage( 'Editing is done.  Override this function to do something useful.' );
-
-      if( nil <> newFn ) then
-        begin
-          lblFunctionDescr.Caption := newFn.descr;
-          newFn.debug();
-        end
-      else
-        lblFunctionDescr.Caption := tr( '(No function is selected)' )
-      ;
-
-      _editing := false;
-      _creating := false;
-      *)
     end
   ;
 
@@ -571,7 +638,7 @@ implementation
         begin
           // Make sure that the user knows that there will be multiple effects
           //------------------------------------------------------------------
-          if( listItem.refCounter > 1 ) then
+          if( 1 < listItem.refCounter ) then
             begin
               response := msgYesNo(
                 tr( 'This function is used in several places.  Removing it will affect all of them.  Continue?' ),
@@ -610,12 +677,15 @@ implementation
         begin
           if( nil <> _modelList ) then
             _modelList.removeChart( cboChartList.items.strings[idx] )
-          else
+          else if( nil <> _model ) then
             _model.removeChart( cboChartList.items.strings[idx] )
           ;
+
           _functionDict.value( cboChartList.items.strings[idx] ).removed := true;
 
-          _model.setChart( _whichChart, nil, _addlInfo );
+          if( nil <> _model ) then
+            _model.setChart( _whichChart, nil, _addlInfo )
+          ;
 
           updateAppDisplay();
         end
@@ -629,8 +699,12 @@ implementation
   }
   procedure TFrameFunctionEditor.clearChart();
     begin
-      _model.setChart( _whichChart, nil, _addlInfo );
-      
+      _chartFn := nil;
+
+      if( nil <> _model ) then
+        _model.setChart( _whichChart, nil, _addlInfo )
+      ;
+
       updateAppDisplay();
     end
   ;
@@ -647,56 +721,32 @@ implementation
 
   {*
     Used with cboChartListChange() to select one of the available functions.
-    FIX ME: consider making this a public function.
 
     @param idx Index of the chart (in cboChartList) to set
   }
   procedure TFrameFunctionEditor.setChart( const idx: integer );
   	var
     	fn: TChartFunction;
-      oldCount: Integer;
   	begin
       if( 0 <= idx ) then
         begin
           dbcout( endl, DBSHOWMSG );
 
-          // Decrement the reference counter for the old list item...
-          if( nil <> _chartFn ) then
-            begin
-              dbcout2( 'Old Chart Function ' + _chartFn.name + ' had a ref count of: ' + IntToStr(_functionDict.value(_chartFn.name).refCounter), DBSHOWMSG );
-              _functionDict.value(_chartFn.name).decrRefCounter();
-              dbcout2( 'Old Chart Function ' + _chartFn.name + ' now has a ref count of: ' + IntToStr(_functionDict.value(_chartFn.name).refCounter), DBSHOWMSG );
-            end
-          else
-            dbcout2( 'Old Chart Function was nil', DBSHOWMSG )
+          if( nil = _chartFn ) then
+            dbcout( 'Old Chart Function was nil', DBSHOWMSG )
           ;
 
-          // ...set the new list item...
+          // Set the new list item...
           fn := cboChartList.items.objects[idx] as TChartFunction;
           _chartFn := _functionDict.value(fn.name).fn;
 
           // ...update the application to show that a change was made...
           updateAppDisplayForChartChange( fn );
 
-          dbcout( endl, DBSHOWMSG );
-          
-          // ... and increment the counter for the new list item.
-          dbcout( 'New Chart Function ' + _chartFn.name + ' had a ref count of: ' + IntToStr(_functionDict.value(_chartFn.name).refCounter), DBSHOWMSG );
-          _functionDict.value(_chartFn.name).incrRefCounter();
-          dbcout( 'New Chart Function ' + _chartFn.name + ' now has a ref count of: ' + IntToStr(_functionDict.value(_chartFn.name).refCounter), DBSHOWMSG );
-
-          // Finally, remember to update the production type.
-          oldCount := _functionDict.value(_chartFn.name).refCounter;
-          _model.setChart( _whichChart, _chartFn, _addlInfo );
-          
-          //SetChart Functions incr the ref counter......set it back.
-          //  This fixes the bug where charts, which should only have a ref count of 1
-          //  have higher counts....the setChart() function in their respective units, such as ProductionType, etc...
-          //  incremented the refcount.  Check it here to be sure it wasn't changed and if it was, set it back.
-          if  ( _functionDict.value(_chartFn.name).refCounter <> oldCount ) then
-            _functionDict.value(_chartFn.name).refCounter := oldCount
+          // Finally, remember to update the model.
+          if( nil <> _model ) then
+            _model.setChart( _whichChart, _chartFn, _addlInfo )
           ;
-            
         end
       else
         // This happens once in a while during initial setup.  Just ignore it.
@@ -717,7 +767,7 @@ implementation
   }
   procedure TFrameFunctionEditor.newChart();
     var
-      frm: TFormChartPointsEditor2;
+      frm: TFormFunctionEditor;
       newFn: TChartFunction;
     begin
       frm := nil;
@@ -728,9 +778,10 @@ implementation
         case _chartType of
           CTPdf, CTRel:
             begin
-              frm := TFormChartPointsEditor2.create(
+              frm := TFormFunctionEditor.create(
                 _myForm, // AOwner: TComponent;
                 chartType, // const chartType: TChartType;
+                _allowedPdfTypes, // const allowedPdfTypes: TPdfTypeSet = [];
                 xUnits, // const xAxisUnits: TChartUnitType = UnitsUnknown;
                 yUnits, // const yAxisUnits: TChartUnitType = UnitsUnknown;
                 true, // const unitsLocked: boolean = true;
@@ -738,7 +789,8 @@ implementation
                 maxY, // const maxY: double = 0.0;
                 '', // const title: string = '';
                 false, // const titleLocked: boolean = true;
-                false // const readOnly: boolean = false
+                _readOnly, // const readOnly: boolean = false;
+                _xUnitsLabel // const xUnitsLabel: string = ''
               );
             end
           ;
@@ -762,7 +814,9 @@ implementation
       finally
         _editing := false;
         _creating := false;
-        freeAndNil( frm );
+        if( nil <> frm ) then
+          frm.Release()
+        ;
       end;
     end
   ;
@@ -779,7 +833,7 @@ implementation
 
       // Make sure that the user knows that there will be multiple effects
       //------------------------------------------------------------------
-      if( listItem.refCounter > 1 ) then
+      if( 1 < listItem.refCounter ) then
       	begin
           response := msgYesNo(
             tr( 'This function is used in several places.  Altering it will affect all of them.  Continue?' ),
@@ -802,12 +856,13 @@ implementation
   }
   procedure TFrameFunctionEditor.editChart( const idx: integer );
     var
-      frm: TFormChartPointsEditor2;
+      frm: TFormFunctionEditor;
       oldChart: TChartFunction;
       newChart: TChartFunction;
     begin
       _editing := true;
       _creating := false;
+      frm := nil;
 
       try
         if( not multipleEffectsOK( idx ) ) then
@@ -819,48 +874,49 @@ implementation
 
         _chartType := oldChart.chartType;
 
-        if( oldChart is TPdfPiecewise ) then
+        if
+          ( ( oldChart is TPdfPiecewise ) and ( 3 > (oldChart as TPdfPiecewise).pointCount ) )
+        or
+          ( ( oldChart is TPdfHistogram ) and ( 1 > (oldChart as TPdfHistogram).nBins ) )
+        or
+          ( ( oldChart is TRelFunction ) and ( 1 > (oldChart as TRelFunction).pointCount ) )
+        then
           begin
-            if( 3 > length( (oldChart as TPdfPiecewise).pointArray ) ) then
-              begin
-                msgOK(
-                  tr( 'There are not enough points to specify this function.' )
-                    + '  ' + tr( 'A default set of points will be created.' ),
-                  tr( 'Too few points' ),
-                  IMGInformation,
-                  _myForm
-                );
-              end
-            ;
-          end
-        ;
-
-        if( oldChart is TRelFunction ) then
-          begin
-            if( 1 > length( (oldChart as TRelFunction).pointArray ) ) then
-              begin
-                msgOK(
-                  tr( 'There are not enough points to specify this function.' )
-                    + '  ' + tr( 'A default set of points will be created.' ),
-                  tr( 'Too few points' ),
-                  IMGInformation,
-                  _myForm
-                );
-              end
-            ;
+            msgOK(
+              tr( 'There are not enough points to specify this function.' )
+                + '  ' + tr( 'A default set of points will be created.' ),
+              tr( 'Too few points' ),
+              IMGInformation,
+              _myForm
+            );
           end
         ;
 
         case _chartType of
           CTPdf, CTRel:
             begin
-              frm := TFormChartPointsEditor2.create(
+              frm := TFormFunctionEditor.create(
                 _myForm, // AOwner: TComponent;
                 oldChart, // const chart: TChartFunction;
+                _allowedPdfTypes, // const allowedPdfTypes: TPdfTypeSet;
+                true, // const unitsLocked: boolean = true;
                 minY, // const minY: double = 0.0;
                 maxY, // const maxY: double = 0.0;
-                false // const readOnly: boolean = false;
+                _readOnly, // const readOnly: boolean = false;
+                _xUnitsLabel // const xUnitsLabel: string = ''
               );
+
+              frm.ShowModal();
+
+              if( frm.changesSaved ) then
+                begin
+                  newChart := frm.createFunction();
+                  self.editDone( newChart );
+                  freeAndNil( newChart );
+                end
+              else
+                dbcout( 'Changes to existing chart were not saved', DBSHOWMSG )
+              ;
             end
           ;
           else
@@ -868,23 +924,13 @@ implementation
           ;
         end;
 
-        frm.ShowModal();
-
-        if( frm.changesSaved ) then
-          begin
-            newChart := frm.createFunction();
-            self.editDone( newChart );
-            freeAndNil( newChart );
-          end
-        else
-          dbcout( 'Changes to existing chart were not saved', DBSHOWMSG )
-        ;
-
          dbcout( '--- done TFrameFunctionEditor.editChart', DBSHOWMSG );
       finally
         _editing := false;
         _creating := false;
-        freeAndNil( frm );
+        if( nil <> frm ) then
+          frm.Release()
+        ;
       end;
     end
   ;
@@ -913,11 +959,23 @@ implementation
     @param fn The instance of TChartFunction (PDF or REL) to add to the list
   }
   procedure TFrameFunctionEditor.appendFunction( fn: TChartFunction );
+    var
+      str: string;
     begin
-      if( CTUnspecified = chartType ) then chartType := fn.chartType;
+      if( CTUnspecified = chartType ) then
+        chartType := fn.chartType
+      ;
 
       if( chartType <> fn.chartType ) then
-        raise exception.create( 'Wrong kind of chart is being added in TFrameFunctionEditor.appendFunction' )
+        begin
+          str := 'Wrong kind of chart is being added in TFrameFunctionEditor.appendFunction():';
+          str := str
+            + ' '
+            + chartTypeAsString ( fn.chartType ) + ' is provided, '
+            + chartTypeAsString( chartType ) + ' is expected.'
+          ;
+          raise exception.create( str );
+        end
       else
         cboChartList.AddItem( fn.name, fn )
       ;
@@ -961,7 +1019,7 @@ implementation
   ;
 
 
-  procedure TFrameFunctionEditor.cboChartListChange(Sender: TObject);
+  procedure TFrameFunctionEditor.setDefaultButtonEnabling();
     begin
       if( -1 = cboChartList.ItemIndex ) then
         begin
@@ -969,31 +1027,93 @@ implementation
           btnEdit.Enabled := false;
           btnRemove.Enabled := false;
           btnClear.Enabled := false;
+          btnNew.Enabled := self.enabled;
         end
       else
         begin
           lblFunctionDescr.Caption := ( cboChartList.Items.Objects[ cboChartList.itemIndex ] as TChartFunction ).descr;
-          btnEdit.Enabled := true;
-          btnRemove.Enabled := true;
-          btnClear.Enabled := true;
+          btnEdit.Enabled := self.enabled;
+          btnRemove.Enabled := self.enabled;
+          btnClear.Enabled := self.enabled;
+          btnNew.Enabled := self.enabled;
         end
       ;
+    end
+  ;
+
+
+  procedure TFrameFunctionEditor.cboChartListChange(Sender: TObject);
+    begin
+      setDefaultButtonEnabling();
 
       setChart( cboChartList.ItemIndex );
     end
   ;
 
-  procedure TFrameFunctionEditor.showChart( p: TModelWithFunctions; c: TChartFunction; ch: TSMChart );
+
+  procedure TFrameFunctionEditor.showChart();
     var
       i: integer;
   	begin
-   		_chartFn := c;
-      _whichChart := ch;
-      _model := p;
-
-      if( nil <> c ) then
+      if( fn is TPdf ) then
         begin
-          i := cboChartList.Items.IndexOf( c.name );
+          if( not( (fn as TPdf).pdfType in _allowedPdfTypes ) ) then
+            begin
+              raise exception.create( 'Indicated pdf type (' + pdfTypeDescr( (fn as TPdf).pdfType )  + ') is not allowed in TFrameFunctionEditor.showChart' );
+              exit;
+            end
+          ;
+        end
+      ;
+
+      if( nil <> chart ) then
+        begin
+          i := cboChartList.Items.IndexOf( chart.name );
+          if( i > -1 ) then
+            cboChartList.ItemIndex := i
+          else
+            cboChartList.ItemIndex := -1;
+          ;
+        end
+      else
+        cboChartList.itemIndex := -1
+      ;
+
+      cboChartListChange( nil );
+    end
+  ;
+
+
+  procedure TFrameFunctionEditor.showChart( const fnName: string );
+    begin
+      _chartFn := _functionDict.value( fnName ).fn;
+      showChart(); 
+    end
+  ;
+
+
+  procedure TFrameFunctionEditor.showChart( m: TModelWithFunctions; fn: TChartFunction; ch: TSMChart );
+    var
+      i: integer;
+  	begin
+      if( fn is TPdf ) then
+        begin
+          if( not( (fn as TPdf).pdfType in _allowedPdfTypes ) ) then
+            begin
+              raise exception.create( 'Indicated pdf type (' + pdfTypeDescr( (fn as TPdf).pdfType )  + ') is not allowed in TFrameFunctionEditor.showChart' );
+              exit;
+            end
+          ;
+        end
+      ;
+
+   		_chartFn := fn;
+      _whichChart := ch;
+      _model := m;
+
+      if( nil <> fn ) then
+        begin
+          i := cboChartList.Items.IndexOf( fn.name );
           if( i > -1 ) then
             cboChartList.ItemIndex := i
           else
@@ -1014,9 +1134,9 @@ implementation
 //-----------------------------------------------------------------------------
 // Initial setup (property-like functions)
 //-----------------------------------------------------------------------------
-  procedure TFrameFunctionEditor.setFunctionDict( list: TFunctionDictionary );
+  procedure TFrameFunctionEditor.setFunctionDict( dict: TFunctionDictionary );
   	begin
-   		_functionDict := list;
+   		_functionDict := dict;
     end
   ;
 
@@ -1076,11 +1196,21 @@ implementation
       ;
 
       btnNew.Enabled := val;
-      lblFunctionDescr.Visible := val;
-      cboChartList.Enabled := val;
-      cboChartList.Visible := val;
 
-      lblDisabled.Visible := not( val );
+      if( _useLblDisabled ) then
+        begin
+          lblFunctionDescr.Visible := val;
+          cboChartList.Enabled := val;
+          cboChartList.Visible := val;
+          lblDisabled.Visible := not( val );
+        end
+      else
+        begin
+          lblFunctionDescr.enabled := val;
+          cboChartList.Enabled := val;
+          lblDisabled.Visible := false;
+        end
+      ;
 
       _enabled := val;
     end
@@ -1088,10 +1218,46 @@ implementation
 
   function TFrameFunctionEditor.getEnabled(): boolean; begin result := _enabled; end;
 
+
+  procedure TFrameFunctionEditor.setReadOnly( const val: boolean );
+    begin
+      if( val ) then
+        begin
+          _readOnly := true;
+
+          btnEdit.Caption := tr( 'View' );
+
+          if( -1 = cboChartList.ItemIndex ) then
+            btnEdit.Enabled := false
+          else
+            btnEdit.Enabled := self.enabled
+          ;
+
+          btnClear.Enabled := false;
+          btnNew.Enabled := false;
+          btnRemove.Enabled := false;
+
+          cboChartList.Enabled := false;
+        end
+      else
+        begin
+          _readOnly := false;
+
+          btnEdit.Caption := tr( 'Edit...' );
+
+          setDefaultButtonEnabling();
+
+          cboChartList.Enabled := self.enabled;
+        end
+      ;
+    end
+  ;
+
+
   procedure TFrameFunctionEditor.setChartType( val: TChartType );
     begin
       _chartType := val;
-      if( CTPdf = _chartType ) then yUnits := UnitsUnitless;
+      if( CTPdf = _chartType ) then yUnits := UUnitless;
     end
   ;
 
@@ -1099,12 +1265,20 @@ implementation
 
   // Properties to be passed through to the chart points editor when necessary
   procedure TFrameFunctionEditor.setUnitsLocked( val: boolean ); begin _unitsLocked := val; end;
-  procedure TFrameFunctionEditor.setXUnits( val: TChartUnitType ); begin _xUnits := val; end;
+
+  procedure TFrameFunctionEditor.setXUnits( val: TChartUnitType );
+    begin
+      _xUnits := val;
+      _xUnitsLabel := chartUnitTypeAsString( val );
+    end
+  ;
+
+  procedure TFrameFunctionEditor.setXUnitsLabel( val: string ); begin _xUnitsLabel := val; end;
 
   procedure TFrameFunctionEditor.setYUnits( val: TChartUnitType );
     begin
       if( CTPdf = _chartType ) then
-        _yUnits := UnitsUnitless
+        _yUnits := UUnitless
       else
         _yUnits := val
       ;
@@ -1117,9 +1291,48 @@ implementation
 
   function TFrameFunctionEditor.getUnitsLocked(): boolean; begin result := _unitsLocked; end;
   function TFrameFunctionEditor.getXUnits(): TChartUnitType; begin result := _xUnits; end;
+  function TFrameFunctionEditor.getXUnitsLabel(): string; begin result := _xUnitsLabel; end;
   function TFrameFunctionEditor.getYUnits(): TChartUnitType; begin result := _yUnits; end;
   function TFrameFunctionEditor.getMinY(): double; begin result := _minY; end;
   function TFrameFunctionEditor.getMaxY(): double; begin result := _maxY; end;
+
+
+  function TFrameFunctionEditor.getAllowedPdfTypes(): TPdfTypeSet;
+    begin
+      result := _allowedPdfTypes;
+    end
+  ;
+
+
+  procedure TFrameFunctionEditor.setAllowedPdfTypes( s: TPdfTypeSet );
+    begin
+      _allowedPdfTypes := s;
+    end
+  ;
+
+  procedure TFrameFunctionEditor.allowPdfTypesAll();
+    begin
+      _allowedPdfTypes := allPdfs();
+    end
+  ;
+
+  procedure TFrameFunctionEditor.allowPdfTypesContinuous();
+    begin
+      _allowedPdfTypes := continuousPdfs();
+    end
+  ;
+
+  procedure TFrameFunctionEditor.allowPdfTypesDiscrete();
+    begin
+      _allowedPdfTypes := discretePdfs();
+    end
+  ;
+
+  procedure TFrameFunctionEditor.allowPdfTypesContinuousBounded();
+    begin
+      _allowedPdfTypes := continuousBoundedPdfs();
+    end
+  ;
 //-----------------------------------------------------------------------------
 
 

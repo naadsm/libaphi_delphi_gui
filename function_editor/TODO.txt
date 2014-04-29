@@ -1,0 +1,2 @@
+Delete file FormChartPointsEditor2.dfm
+Delete file FormChartPointsEditor2.pas

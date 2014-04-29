@@ -92,7 +92,6 @@ object FramePointEditorGrid: TFramePointEditorGrid
     TabOrder = 1
     OnEnter = stgPointsEnter
     OnKeyPress = stgPointsKeyPress
-    OnKeyUp = stgPointsKeyUp
     OnMouseDown = stgPointsMouseDown
     ColWidths = (
       47

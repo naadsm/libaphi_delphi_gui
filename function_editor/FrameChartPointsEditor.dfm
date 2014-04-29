@@ -15,8 +15,8 @@ inherited FrameChartPointsEditor: TFrameChartPointsEditor
     ParentFont = False
     TabOrder = 0
     object lblErrorMessage: TLabel
-      Left = 128
-      Top = 280
+      Left = 176
+      Top = 424
       Width = 116
       Height = 16
       Alignment = taCenter
@@ -31,42 +31,50 @@ inherited FrameChartPointsEditor: TFrameChartPointsEditor
     end
   end
   object pnlChart: TPanel
-    Left = 136
+    Left = 72
     Top = 8
-    Width = 305
-    Height = 249
+    Width = 449
+    Height = 345
     TabOrder = 1
     object pnlCumulativeContainer: TPanel
       Left = 1
       Top = 1
-      Width = 303
+      Width = 447
       Height = 25
       Align = alTop
       TabOrder = 0
       object pnlCumulative: TPanel
         Left = 1
         Top = 1
-        Width = 301
+        Width = 445
         Height = 23
         Align = alClient
         BevelOuter = bvNone
         TabOrder = 0
-        object cbxShowCumProb: TCheckBox
+        object cbxShowCumulProb: TCheckBox
           Left = 6
           Top = 4
-          Width = 291
+          Width = 227
           Height = 17
           Caption = 'Show cumulative probability'
           TabOrder = 0
-          OnClick = cbxShowCumProbClick
+          OnClick = cbxShowCumulProbClick
+        end
+        object cbxShowDiscreteApprox: TCheckBox
+          Left = 232
+          Top = 4
+          Width = 193
+          Height = 17
+          Caption = 'Show discrete approximation'
+          TabOrder = 1
         end
       end
     end
     object chartMain: TChart
       Left = 1
       Top = 26
-      Width = 303
-      Height = 222
+      Width = 447
+      Height = 318
       AllowPanning = pmNone
       AllowZoom = False
       BackWall.Brush.Color = clWhite
@@ -83,11 +91,11 @@ inherited FrameChartPointsEditor: TFrameChartPointsEditor
       TabOrder = 1
       OnMouseDown = chartMainMouseDown
       OnMouseUp = chartMainMouseUp
-      object seriesPDF: TAreaSeries
+      object serPDFContinuous: TAreaSeries
         Marks.ArrowLength = 8
         Marks.Visible = False
         SeriesColor = clBlue
-        Title = 'seriesPDF'
+        Title = 'seriesPDFContinuous'
         DrawArea = True
         Pointer.HorizSize = 2
         Pointer.InflateMargins = True
@@ -103,11 +111,28 @@ inherited FrameChartPointsEditor: TFrameChartPointsEditor
         YValues.Multiplier = 1.000000000000000000
         YValues.Order = loNone
       end
-      object seriesCumulative: TFastLineSeries
+      object serPdfDiscrete: TBarSeries
+        Marks.ArrowLength = 20
+        Marks.Visible = False
+        SeriesColor = clMaroon
+        ShowInLegend = False
+        Title = 'seriesPdfDiscrete'
+        BarWidthPercent = 80
+        OffsetPercent = 50
+        XValues.DateTime = False
+        XValues.Name = 'X'
+        XValues.Multiplier = 1.000000000000000000
+        XValues.Order = loAscending
+        YValues.DateTime = False
+        YValues.Name = 'Bar'
+        YValues.Multiplier = 1.000000000000000000
+        YValues.Order = loNone
+      end
+      object serPdfCumulative: TFastLineSeries
         Marks.ArrowLength = 8
         Marks.Visible = False
         SeriesColor = clRed
-        Title = 'seriesCumulative'
+        Title = 'seriesPdfCumulative'
         LinePen.Color = clRed
         XValues.DateTime = False
         XValues.Name = 'X'
@@ -118,10 +143,11 @@ inherited FrameChartPointsEditor: TFrameChartPointsEditor
         YValues.Multiplier = 1.000000000000000000
         YValues.Order = loNone
       end
-      object SeriesREL: TLineSeries
+      object serREL: TLineSeries
         Marks.ArrowLength = 8
         Marks.Visible = False
         SeriesColor = clGreen
+        Title = 'seriesREL'
         Pointer.HorizSize = 2
         Pointer.InflateMargins = True
         Pointer.Style = psRectangle
@@ -133,6 +159,23 @@ inherited FrameChartPointsEditor: TFrameChartPointsEditor
         XValues.Order = loAscending
         YValues.DateTime = False
         YValues.Name = 'Y'
+        YValues.Multiplier = 1.000000000000000000
+        YValues.Order = loNone
+      end
+      object serPdfDiscreteApprox: TBarSeries
+        Marks.ArrowLength = 20
+        Marks.Style = smsPercent
+        Marks.Visible = False
+        SeriesColor = clGreen
+        Title = 'serPdfDiscreteApprox'
+        BarWidthPercent = 80
+        OffsetPercent = -50
+        XValues.DateTime = False
+        XValues.Name = 'X'
+        XValues.Multiplier = 1.000000000000000000
+        XValues.Order = loAscending
+        YValues.DateTime = False
+        YValues.Name = 'Bar'
         YValues.Multiplier = 1.000000000000000000
         YValues.Order = loNone
       end

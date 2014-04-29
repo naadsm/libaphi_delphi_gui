@@ -4,13 +4,13 @@ unit FramePointEditorGrid;
 FramePointEditorGrid.pas/dfm
 ----------------------------
 Begin: 2005/11/10
-Last revision: $Date: 2008/11/25 22:05:57 $ $Author: areeves $
-Version number: $Revision: 1.1 $
-Project: NAADSM and related applications
-Website: http://www.naadsm.org
-Author: Aaron Reeves <Aaron.Reeves@colostate.edu>
+Last revision: $Date: 2013-06-27 19:11:23 $ $Author: areeves $
+Version number: $Revision: 1.9.4.5 $
+Project: APHI Delphi Library for Simulation Modeling
+Website: http://www.naadsm.org/opensource/libaphi/
+Author: Aaron Reeves <Aaron.Reeves@ucalgary.ca>
 --------------------------------------------------
-Copyright (C) 2005 - 2008 Animal Population Health Institute, Colorado State University
+Copyright (C) 2005 - 2008 Colorado State University
 
 This program is free software; you can redistribute it and/or modify it under the terms of the GNU General
 Public License as published by the Free Software Foundation; either version 2 of the License, or
@@ -36,7 +36,10 @@ interface
     Menus,
     FunctionPointers,
 
-    Points
+    MyDelphiArrayUtils,
+    Points,
+
+    ProbDensityFunctions
   ;
 
   type StartGridType = array[0..1] of array of string[20];
@@ -64,11 +67,6 @@ interface
         Shift: TShiftState;
         X, Y: Integer
       );
-
-      procedure stgPointsKeyDown(Sender: TObject; var Key: Word;
-        Shift: TShiftState);
-      procedure stgPointsKeyUp(Sender: TObject; var Key: Word;
-        Shift: TShiftState);
       procedure itemInsertRowClick(Sender: TObject);
       procedure itemDeleteRowClick(Sender: TObject);
 
@@ -112,12 +110,9 @@ interface
 
 			// Useful public functions
 			//------------------------
-      procedure setPoints( pnt: RPointArray );
-
-			{*
-			Sets the points in pnt to the points specified on this form.
-			}
-			procedure resetPoints( var pnt: RPointArray );
+      procedure setPointsPiecewisePdf( pnt: RPointArray );
+      procedure setPointsRelFunction( pnt: RPointArray );
+      procedure setPointsHistogramPdf( rcd: RHistogramPointArray );
 
 			// Properties
 			//-----------
@@ -135,8 +130,10 @@ implementation
 	{$R *.DFM}
 
   uses
+    Math,
+    Clipbrd,
+
     MyStrUtils,
-    GuiStrUtils,
     DebugWindow,
     ControlUtils,
     I88n
@@ -144,178 +141,6 @@ implementation
 
   const
     DBSHOWMSG: boolean = false; // Set to true to enable debugging messages for this unit
-
-//-----------------------------------------------------------------------------
-// Local helper functions: I hate these things!
-// 	FIX ME: These haven't been reformatted or cleaned up.  They are just
-// 	as Mark left them.
-//-----------------------------------------------------------------------------
-  procedure CheckValidityOfSG(
-    sg : TStringGrid; PDF : boolean;
-    var ErrorCode : byte;
-    var Row : longint);
-  var
-    r : longint;
-    X,Y,LX,LY : double;
-    Ok : boolean;
-    ec : byte;
-
-  function ConvertStrFloat(s : string;
-      var OK : boolean) : double;
-    var
-      d : double;
-    begin
-      d := -1;
-      Ok := true;
-      try
-        d := StrToFloat(s);
-      except
-        Ok := False;
-      end;
-      Result := d;
-    end;
-
-  procedure CheckValues(
-      row, RowCount : longint;
-      X, LX, Y, LY : double;
-      PDF : boolean;
-      var ec : byte);
-    begin
-      if Y < 0 then
-        ec := 3 // Y less than 0
-      else
-      if (PDF and
-        ((row = 1) or (row=RowCount-1)) and
-        (Y <> 0)) then
-          ec := 4  // PDF not beginning and ending on 0
-      else
-      if row > 1 then
-      begin
-        OK := LX <= X;
-        if not OK then
-          ec := 5; // X is less than previous
-      end;
-    end;
-
-  procedure CheckForZeroArea(
-     sg : TStringGrid; var ec : byte);
-    var
-      Ok : boolean;
-      r : longint;
-      Y : double;
-    begin
-      Ok := False;
-      for r := 1 to sg.RowCount - 1 do
-      begin
-        Y := StrToFloat(sg.Cells[1,r]);
-        if Y > 0 then
-        begin
-          Ok := True;
-          break;
-        end;
-      end;
-      if not Ok then
-        ec := 6;  // Area of 0
-    end;
-
-  begin // CheckValidityOfSG
-    r := 1; ec := 0; LX := -1; LY := -1;
-    repeat
-      X := ConvertStrFloat(
-          sg.Cells[0,r],OK);
-      if Ok then
-      begin
-        Y := ConvertStrFloat(
-          sg.Cells[1,r],OK);
-        if OK then
-        begin
-          CheckValues(r, sg.RowCount,
-            X, LX, Y, LY, PDF, ec);
-          if ec = 0 then
-          begin
-            LX := X;
-            LY := Y;
-            Inc(r);
-          end;
-        end
-        else
-          ec := 2; // conversion error Y
-      end
-      else
-        ec := 1; // conversion error X
-    until (ec <> 0) or (r >= sg.RowCount);
-    if (ec = 0) and PDF then
-      CheckForZeroArea(sg, ec);
-    ErrorCode := ec;
-    Row := r;
-  end;
-
-
-  (*
-  function IsDataValid(sg : TStringGrid;
-    PDF : boolean) : boolean;
-  var
-    ErrorCode : byte;
-    Row,c : Longint;
-    rs, m : string;
-    myRect: TGridRect;
-  begin // IsDataValid
-    CheckValidityOfSG(sg, PDF, ErrorCode, Row);
-    rs := IntToStr(Row);
-    case ErrorCode of
-      1 : m := 'Conversion error for X, row ' + rs;
-      2 : m := 'Conversion error for Y, row ' + rs;
-      3 : m := 'Y must be 0 or more, row ' + rs;
-      4 : m := 'A PDF must begin with Y = 0 and end the same way, row ' + rs;
-      5 : m := 'This X value must be equal to or ' +
-       'greater than the previous one, row ' + rs;
-      6 : m := 'This PDF would not have a defined area.';
-    end;
-    Result := ErrorCode = 0;
-    if (not Result) then
-    begin
-      // change the position of focus in StringGrid
-      if ErrorCode in [1,2,5] then
-        c := 0
-      else
-        c := 1;
-      myRect.Left := c;
-      myRect.Top := Row;
-      myRect.Right := c;
-      myRect.Bottom := Row;
-      sg.Selection := myRect;
-      MessageDlg(m,mtError,[mbOK],0);
-    end;
-  end;
-  *)
-
-
-  procedure MoveDataToStringGrid( P: RPointArray; sg: TStringGrid );
-  var
-    r : longint;
-  begin
-    sg.RowCount := Length(P) + 1;
-    for r := Low(P) to High(P) do
-    begin
-      sg.Cells[0, r + 1] := uiFloatToStr(P[r].X);
-      sg.Cells[1, r + 1] := uiFloatToStr(P[r].Y);
-    end;
-  end;
-
-  procedure MoveStringGridToArray(sg : TStringGrid;
-    var StartGrid : StartGridType);
-  var
-    c,r : longint;
-  begin
-    SetLength(StartGrid[0], sg.RowCount-1);
-    SetLength(StartGrid[1], sg.RowCount-1);
-    for c := 0 to 1 do
-    for r := 0 to High(StartGrid[c]) do
-      StartGrid[c][r] :=
-        sg.Cells[c,r+1];
-	end;
-//-----------------------------------------------------------------------------
-
 
 
 //-----------------------------------------------------------------------------
@@ -331,8 +156,8 @@ implementation
       _myParent := AOwner as TWinControl;
       _prAllPointsEdited := True;
 
-      stgPoints.Cells[0,0] := 'X';
-      stgPoints.Cells[1,0] := 'Y';
+      stgPoints.Cells[0,0] := tr( 'X' );
+      stgPoints.Cells[1,0] := tr( 'Y' );
       stgPoints.DefaultColWidth := self.Width div 2;
 
       _generalPoints := T2DPointList.create();
@@ -380,13 +205,15 @@ implementation
 //-----------------------------------------------------------------------------
 //  Useful public functions
 //-----------------------------------------------------------------------------
-  procedure TFramePointEditorGrid.setPoints( pnt: RPointArray );
+  procedure TFramePointEditorGrid.setPointsPiecewisePdf( pnt: RPointArray );
     var
       i: integer;
     begin
       _generalPoints.Assign( pnt );
 
       stgPoints.RowCount := _generalPoints.Count + 1; // Don't forget the header row
+      stgPoints.Cells[0,0] := tr( 'X' );
+      stgPoints.Cells[1,0] := tr( 'Y' );
 
       for i := 0 to _generalPoints.Count - 1 do
         begin
@@ -398,15 +225,41 @@ implementation
   ;
 
 
-	procedure TFramePointEditorGrid.resetPoints( var pnt: RPointArray );
-  	var
-    	i: longint;
+  procedure TFramePointEditorGrid.setPointsRelFunction( pnt: RPointArray );
+    var
+      i: integer;
     begin
-      // Move data from string grid into point array
-      for i := Low( pnt ) to High( pnt ) do
+      _generalPoints.Assign( pnt );
+
+      stgPoints.RowCount := _generalPoints.Count + 1; // Don't forget the header row
+      stgPoints.Cells[0,0] := tr( 'X' );
+      stgPoints.Cells[1,0] := tr( 'Y' );
+
+      for i := 0 to _generalPoints.Count - 1 do
         begin
-          pnt[i].X := StrToFloat( stgPoints.Cells[0, i + 1] );
-          pnt[i].Y := StrToFloat( stgPoints.Cells[1, i + 1] );
+          stgPoints.Cells[0, i+1] := uiFloatToStr( _generalPoints.at(i).x );
+          stgPoints.Cells[1, i+1] := uiFloatToStr( _generalPoints.at(i).y );
+        end
+      ;
+    end
+  ;
+
+
+  procedure TFramePointEditorGrid.setPointsHistogramPdf( rcd: RHistogramPointArray );
+    var
+      i: integer;
+    begin
+      _generalPoints.Clear();
+
+      stgPoints.RowCount := length( rcd ) + 1; // Don't forget the header row
+      stgPoints.Cells[0,0] := tr( 'Bin' );
+      stgPoints.Cells[1,0] := tr( 'Count' );
+
+      for i := 0 to length( rcd ) - 1 do
+        begin
+          _generalPoints.append( T2DPoint.create( rcd[i].range, rcd[i].count ) );
+          stgPoints.Cells[0, i+1] := uiFloatToStr( rcd[i].range );
+          stgPoints.Cells[1, i+1] := uiFloatToStr( rcd[i].count);
         end
       ;
     end
@@ -437,7 +290,9 @@ implementation
       btnOK.Enabled := false;
       btnCancel.Enabled := false;
 
-      if( nil <> @_setParentMenuitemsEnabled ) then _setParentMenuItemsEnabled( true );
+      if( nil <> @_setParentMenuitemsEnabled ) then
+        _setParentMenuItemsEnabled( true )
+      ;
     end
   ;
 
@@ -449,58 +304,62 @@ implementation
       btnOK.Enabled := false;
       btnCancel.Enabled := false;
 
-      if( nil <> @_setParentMenuitemsEnabled ) then _setParentMenuItemsEnabled( true );
+      if( nil <> @_setParentMenuitemsEnabled ) then
+        _setParentMenuItemsEnabled( true )
+      ;
     end
   ;
 
   procedure TFramePointEditorGrid.stgPointsEnter(Sender: TObject);
     begin
-      dbcout( 'Entered!', DBSHOWMSG );
+      inherited;
+
+      dbcout( 'TFramePointEditorGrid.stgPointsEnter()', DBSHOWMSG );
+
+
       btnOK.Enabled := true;
       btnCancel.Enabled := true;
 
       dbcout( '_setParentMenuitemsEnabled is nil: ' + uiBoolToText( nil = @_setParentMenuitemsEnabled ), DBSHOWMSG );
 
-      if( nil <> @_setParentMenuitemsEnabled ) then _setParentMenuItemsEnabled( false );
 
-      (*
-      try
-        stgPoints.MouseToCell( x, y, c, r );
+      if( nil <> @_setParentMenuitemsEnabled ) then
+        _setParentMenuItemsEnabled( false )
+      ;
 
-        if( 0 < r ) then
-          begin
-            btnOK.Enabled := true;
-            btnCancel.Enabled := true;
-          end
-        ;
-      except
-        // The cursor is probably not over a cell.
-        // Do nothing and fail silently.
-      end;
-      *)
-    end
-  ;
-
-
-  procedure TFramePointEditorGrid.stgPointsKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-  begin
-    inherited;
-    dbcout2( 'Key down: ' + intToStr( Key ) );
-  end
-  ;
-
-
-  procedure TFramePointEditorGrid.stgPointsKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
-    begin
-      dbcout2( 'Key up: ' + intToStr( Key ) );
+      dbcout( 'Done TFramePointEditorGrid.stgPointsEnter()', DBSHOWMSG );
     end
   ;
 
 
   procedure TFramePointEditorGrid.stgPointsKeyPress(Sender: TObject; var Key: Char);
+    var
+      s: string;
     begin
+      inherited;
+
+      if( 3 = ord( key ) ) then // ctrl-C
+        ClipBoard.SetTextBuf( PChar( stgPoints.Cells[ stgPoints.Col, stgPoints.Row ] ) )
+      else if( 22 = ord( key ) ) then // ctrl-V
+        begin
+          if( Clipboard.HasFormat( CF_TEXT ) ) then
+            begin
+              s := fixup( clipboard.AsText );
+              if( not( isNaN( uiStrToFloat( s, NaN ) ) ) ) then
+                stgPoints.Cells[ stgPoints.Col, stgPoints.Row ] := s
+              ;
+            end
+          ;
+        end
+      else if( 24 = ord( key ) ) then // ctrl-X
+        begin
+          ClipBoard.SetTextBuf( PChar( stgPoints.Cells[ stgPoints.Col, stgPoints.Row ] ) );
+          stgPoints.Cells[ stgPoints.Col, stgPoints.Row ] := '';
+        end
+      ;
+      
       // Only allow number keys, -, decimal point, and backspace
-      if not (Key in ['0'..'9', '-', decPt(), CHAR_BACKSPACE ]) then
+      if not (Key in ['0'..'9', '-', sysDecPt(), CHAR_BACKSPACE ]) then
         Key := ^@
       ;
     end
@@ -550,7 +409,10 @@ implementation
     var
       clientPoint: TPoint;
       screenPoint: TPoint;
+      rect: TGridRect;
     begin
+      inherited;
+      
       clientPoint.X := x;
       clientPoint.Y := y;
 
@@ -565,9 +427,21 @@ implementation
 
       if( mbRight = Button ) then
         begin
-          dbcout2( 'Right button! c = %d, r = %d', [_currentColumn, _currentRow] );
-          if( 0 <> _currentRow ) then
-            mnuRowEditor.Popup( screenPoint.x, screenPoint.y + 5 )
+          // Show the Add/Delete Row popup when the mouse is in a valid cell,
+          // the Fixed Row and areas of the grid outside the cells are not valid
+          if (( 0 <> _currentRow ) and ( _currentRow <> -1 )) then
+            begin
+              with rect do
+                begin
+                  left := 0;
+                  right := 2;
+                  top := _currentRow;
+                  bottom := _currentRow;
+                end
+              ;
+              stgPoints.Selection := rect;
+              mnuRowEditor.Popup( screenPoint.x, screenPoint.y + 5 );
+            end
           ;
         end
       ;
@@ -585,6 +459,11 @@ implementation
       i: integer;
       x, y: string;
     begin
+
+      // Behavior changed so the popup should not show and fire this event
+      // if the mouse is in the grid but not in a valid area, but just in case:
+      if ( -1 = _currentRow ) then exit;
+
       colX := TStringList.Create();
       colY := TStringList.Create();
 
@@ -594,32 +473,22 @@ implementation
           colY.Add( stgPoints.Cells[1,i] );
         end
       ;
-      dbcout2( 'Current row: ' + intToStr( _currentRow ) );
 
-      // Add new values to the end of the list
-      if( -1 = _currentRow ) then
+      // insert a row in the appropriate place
+      if( 1 < _currentRow ) then
         begin
-          colX.Add( uiFloatToStr( myStrToFloat( colX[ colX.Count - 1 ] ) + 1 ) );
-          colY.Add( colY[ colY.count - 1 ] );
+          x := uiFloatToStr( ( uiStrToFloat( colX[ _currentRow - 1 ] ) + uiStrToFloat( colX[ _currentRow ] ) ) / 2 );
+          y := uiFloatToStr( ( uiStrToFloat( colY[ _currentRow - 1 ] ) + uiStrToFloat( colY[ _currentRow ] ) ) / 2 );
         end
-      else // insert in the appropriate place
+      else
         begin
-          if( 1 < _currentRow ) then
-            begin
-              x := uiFloatToStr( ( myStrToFloat( colX[ _currentRow - 1 ] ) + myStrToFloat( colX[ _currentRow ] ) ) / 2 );
-              y := uiFloatToStr( ( myStrToFloat( colY[ _currentRow - 1 ] ) + myStrToFloat( colY[ _currentRow ] ) ) / 2 );
-            end
-          else
-            begin
-              x := colX[ 1 ];
-              y := colY[ 1 ];
-            end
-          ;
-
-          colX.Insert( _currentRow, x );
-          colY.Insert( _currentRow, y );
+          x := colX[ 1 ];
+          y := colY[ 1 ];
         end
       ;
+
+      colX.Insert( _currentRow, x );
+      colY.Insert( _currentRow, y );
 
       stgPoints.RowCount := stgPoints.RowCount + 1;
       for i := 0 to stgPoints.RowCount - 1 do
@@ -644,6 +513,11 @@ implementation
       ColY: TStringList;
       i: integer;
     begin
+
+      // Behavior changed so the popup should not show and fire this event
+      // if the mouse is in the grid but not in a valid area, but just in case:
+      if ( -1 = _currentRow ) then exit;
+
       colX := TStringList.Create();
       colY := TStringList.Create();
 
@@ -654,17 +528,8 @@ implementation
         end
       ;
 
-      if( -1 = _currentRow ) then
-        begin
-          colX.Delete( colX.Count - 1 );
-          colY.Delete( colY.Count - 1 );
-        end
-      else
-        begin
-          colX.Delete( _currentRow );
-          colY.Delete( _currentRow );
-        end
-      ;
+      colX.Delete( _currentRow );
+      colY.Delete( _currentRow );
 
       stgPoints.RowCount := stgPoints.RowCount - 1;
       for i := 0 to stgPoints.RowCount - 1 do
@@ -680,5 +545,7 @@ implementation
       freeAndNil( colY );
     end
   ;
+
+
 
 end.

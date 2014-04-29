@@ -1,15 +1,15 @@
 object FrameFunctionParams2: TFrameFunctionParams2
   Left = 0
   Top = 0
-  Width = 747
-  Height = 615
+  Width = 833
+  Height = 759
   HorzScrollBar.Visible = False
   TabOrder = 0
   object pnlParams: TPanel
     Left = 0
     Top = 97
-    Width = 747
-    Height = 518
+    Width = 833
+    Height = 662
     Align = alClient
     TabOrder = 1
     object grpUnspecified: TGroupBox
@@ -51,8 +51,6 @@ object FrameFunctionParams2: TFrameFunctionParams2
         Height = 21
         EditAlign = eaLeft
         TabOrder = 0
-        OnExit = reValueChanged
-        OnKeyDown = rleKeyDown
       end
     end
     object grpGaussian: TGroupBox
@@ -85,8 +83,6 @@ object FrameFunctionParams2: TFrameFunctionParams2
         Height = 21
         EditAlign = eaLeft
         TabOrder = 0
-        OnExit = reValueChanged
-        OnKeyDown = rleKeyDown
       end
       object reStdDevGaussian: TREEdit
         Left = 8
@@ -95,8 +91,6 @@ object FrameFunctionParams2: TFrameFunctionParams2
         Height = 21
         EditAlign = eaLeft
         TabOrder = 1
-        OnExit = reValueChanged
-        OnKeyDown = rleKeyDown
       end
     end
     object grpTriang: TGroupBox
@@ -135,8 +129,6 @@ object FrameFunctionParams2: TFrameFunctionParams2
         Height = 21
         EditAlign = eaLeft
         TabOrder = 0
-        OnExit = reValueChanged
-        OnKeyDown = rleKeyDown
       end
       object reModeTriang: TREEdit
         Left = 8
@@ -145,8 +137,6 @@ object FrameFunctionParams2: TFrameFunctionParams2
         Height = 21
         EditAlign = eaLeft
         TabOrder = 1
-        OnExit = reValueChanged
-        OnKeyDown = rleKeyDown
       end
       object reMaxTriang: TREEdit
         Left = 8
@@ -155,8 +145,6 @@ object FrameFunctionParams2: TFrameFunctionParams2
         Height = 21
         EditAlign = eaLeft
         TabOrder = 2
-        OnExit = reValueChanged
-        OnKeyDown = rleKeyDown
       end
     end
     object grpGamma: TGroupBox
@@ -189,8 +177,6 @@ object FrameFunctionParams2: TFrameFunctionParams2
         Height = 21
         EditAlign = eaLeft
         TabOrder = 0
-        OnExit = reValueChanged
-        OnKeyDown = rleKeyDown
       end
       object reBetaGamma: TREEdit
         Left = 8
@@ -199,8 +185,6 @@ object FrameFunctionParams2: TFrameFunctionParams2
         Height = 21
         EditAlign = eaLeft
         TabOrder = 1
-        OnExit = reValueChanged
-        OnKeyDown = rleKeyDown
       end
     end
     object grpExponential: TGroupBox
@@ -225,8 +209,6 @@ object FrameFunctionParams2: TFrameFunctionParams2
         Height = 21
         EditAlign = eaLeft
         TabOrder = 0
-        OnExit = reValueChanged
-        OnKeyDown = rleKeyDown
       end
     end
     object grpLogistic: TGroupBox
@@ -259,8 +241,6 @@ object FrameFunctionParams2: TFrameFunctionParams2
         Height = 21
         EditAlign = eaLeft
         TabOrder = 0
-        OnExit = reValueChanged
-        OnKeyDown = rleKeyDown
       end
       object reScaleLogistic: TREEdit
         Left = 8
@@ -269,8 +249,6 @@ object FrameFunctionParams2: TFrameFunctionParams2
         Height = 21
         EditAlign = eaLeft
         TabOrder = 1
-        OnExit = reValueChanged
-        OnKeyDown = rleKeyDown
       end
     end
     object grpPiecewise: TGroupBox
@@ -329,8 +307,6 @@ object FrameFunctionParams2: TFrameFunctionParams2
         Height = 21
         EditAlign = eaLeft
         TabOrder = 0
-        OnExit = reValueChanged
-        OnKeyDown = rleKeyDown
       end
       object reScaleLoglogistic: TREEdit
         Left = 8
@@ -339,8 +315,6 @@ object FrameFunctionParams2: TFrameFunctionParams2
         Height = 21
         EditAlign = eaLeft
         TabOrder = 1
-        OnExit = reValueChanged
-        OnKeyDown = rleKeyDown
       end
       object reShapeLoglogistic: TREEdit
         Left = 8
@@ -349,8 +323,6 @@ object FrameFunctionParams2: TFrameFunctionParams2
         Height = 21
         EditAlign = eaLeft
         TabOrder = 2
-        OnExit = reValueChanged
-        OnKeyDown = rleKeyDown
       end
     end
     object grpUniform: TGroupBox
@@ -382,8 +354,6 @@ object FrameFunctionParams2: TFrameFunctionParams2
         Height = 21
         EditAlign = eaLeft
         TabOrder = 0
-        OnExit = reValueChanged
-        OnKeyDown = rleKeyDown
       end
       object reMaxUniform: TREEdit
         Left = 8
@@ -392,8 +362,6 @@ object FrameFunctionParams2: TFrameFunctionParams2
         Height = 21
         EditAlign = eaLeft
         TabOrder = 1
-        OnExit = reValueChanged
-        OnKeyDown = rleKeyDown
       end
     end
     object grpLognormal2: TGroupBox
@@ -425,8 +393,6 @@ object FrameFunctionParams2: TFrameFunctionParams2
         Height = 21
         EditAlign = eaLeft
         TabOrder = 0
-        OnExit = reValueChanged
-        OnKeyDown = rleKeyDown
       end
       object reSigmaLognormal2: TREEdit
         Left = 8
@@ -435,8 +401,6 @@ object FrameFunctionParams2: TFrameFunctionParams2
         Height = 21
         EditAlign = eaLeft
         TabOrder = 1
-        OnExit = reValueChanged
-        OnKeyDown = rleKeyDown
       end
     end
     object grpBeta: TGroupBox
@@ -482,8 +446,6 @@ object FrameFunctionParams2: TFrameFunctionParams2
         Height = 21
         EditAlign = eaLeft
         TabOrder = 0
-        OnExit = reValueChanged
-        OnKeyDown = rleKeyDown
       end
       object reAlpha2Beta: TREEdit
         Left = 8
@@ -492,8 +454,6 @@ object FrameFunctionParams2: TFrameFunctionParams2
         Height = 21
         EditAlign = eaLeft
         TabOrder = 1
-        OnExit = reValueChanged
-        OnKeyDown = rleKeyDown
       end
       object reMinBeta: TREEdit
         Left = 8
@@ -502,8 +462,6 @@ object FrameFunctionParams2: TFrameFunctionParams2
         Height = 21
         EditAlign = eaLeft
         TabOrder = 2
-        OnExit = reValueChanged
-        OnKeyDown = rleKeyDown
       end
       object reMaxBeta: TREEdit
         Left = 8
@@ -512,8 +470,6 @@ object FrameFunctionParams2: TFrameFunctionParams2
         Height = 21
         EditAlign = eaLeft
         TabOrder = 3
-        OnExit = reValueChanged
-        OnKeyDown = rleKeyDown
       end
     end
     object btnConvert: TButton
@@ -544,8 +500,8 @@ object FrameFunctionParams2: TFrameFunctionParams2
       end
     end
     inline fraPointEditorGrid: TFramePointEditorGrid
-      Left = 450
-      Top = 272
+      Left = 500
+      Top = 350
       Width = 217
       Height = 161
       TabOrder = 14
@@ -567,11 +523,286 @@ object FrameFunctionParams2: TFrameFunctionParams2
         OnKeyDown = fraPointEditorGridstgPointsKeyDown
       end
     end
+    object grpDiscreteUniform: TGroupBox
+      Left = 144
+      Top = 404
+      Width = 129
+      Height = 113
+      Caption = 'Parameters '
+      TabOrder = 15
+      Visible = False
+      object lblDiscreteUniformMin: TLabel
+        Left = 8
+        Top = 20
+        Width = 44
+        Height = 13
+        Caption = 'Minimum:'
+      end
+      object lblDiscreteUniformMax: TLabel
+        Left = 8
+        Top = 64
+        Width = 47
+        Height = 13
+        Caption = 'Maximum:'
+      end
+      object reMinDiscreteUniform: TREEdit
+        Left = 8
+        Top = 36
+        Width = 65
+        Height = 21
+        EditAlign = eaLeft
+        TabOrder = 0
+      end
+      object reMaxDiscreteUniform: TREEdit
+        Left = 8
+        Top = 80
+        Width = 65
+        Height = 21
+        EditAlign = eaLeft
+        TabOrder = 1
+      end
+    end
+    object grpBinomial: TGroupBox
+      Left = 8
+      Top = 404
+      Width = 129
+      Height = 113
+      Caption = 'Parameters '
+      TabOrder = 16
+      Visible = False
+      object lblBinomialN: TLabel
+        Left = 8
+        Top = 20
+        Width = 9
+        Height = 13
+        Caption = 'n:'
+      end
+      object lblBinomialP: TLabel
+        Left = 8
+        Top = 64
+        Width = 9
+        Height = 13
+        Caption = 'p:'
+      end
+      object reNBinomial: TREEdit
+        Left = 8
+        Top = 36
+        Width = 65
+        Height = 21
+        EditAlign = eaLeft
+        TabOrder = 0
+      end
+      object rePBinomial: TREEdit
+        Left = 8
+        Top = 80
+        Width = 65
+        Height = 21
+        EditAlign = eaLeft
+        TabOrder = 1
+      end
+    end
+    object grpHypergeometric: TGroupBox
+      Left = 608
+      Top = 12
+      Width = 129
+      Height = 157
+      Caption = 'Parameters '
+      TabOrder = 17
+      Visible = False
+      object lblHypergeometricM: TLabel
+        Left = 8
+        Top = 108
+        Width = 12
+        Height = 13
+        Caption = 'M:'
+      end
+      object lblHypergeometricD: TLabel
+        Left = 8
+        Top = 64
+        Width = 11
+        Height = 13
+        Caption = 'D:'
+      end
+      object lblHypergeometricN: TLabel
+        Left = 8
+        Top = 20
+        Width = 9
+        Height = 13
+        Caption = 'n:'
+      end
+      object reMHypergeometric: TREEdit
+        Left = 8
+        Top = 124
+        Width = 65
+        Height = 21
+        EditAlign = eaLeft
+        TabOrder = 2
+      end
+      object reDHypergeometric: TREEdit
+        Left = 8
+        Top = 80
+        Width = 65
+        Height = 21
+        EditAlign = eaLeft
+        TabOrder = 1
+      end
+      object reNHypergeometric: TREEdit
+        Left = 8
+        Top = 36
+        Width = 65
+        Height = 21
+        EditAlign = eaLeft
+        TabOrder = 0
+      end
+    end
+    object grpNegBinomial: TGroupBox
+      Left = 424
+      Top = 237
+      Width = 129
+      Height = 113
+      Caption = 'Parameters '
+      TabOrder = 18
+      Visible = False
+      object lblSNegBinomial: TLabel
+        Left = 8
+        Top = 20
+        Width = 8
+        Height = 13
+        Caption = 's:'
+      end
+      object lblPNegBinomial: TLabel
+        Left = 8
+        Top = 64
+        Width = 9
+        Height = 13
+        Caption = 'p:'
+      end
+      object reSNegBinomial: TREEdit
+        Left = 8
+        Top = 36
+        Width = 65
+        Height = 21
+        EditAlign = eaLeft
+        TabOrder = 0
+      end
+      object rePNegBinomial: TREEdit
+        Left = 8
+        Top = 80
+        Width = 65
+        Height = 21
+        EditAlign = eaLeft
+        TabOrder = 1
+      end
+    end
+    object grpPareto: TGroupBox
+      Left = 560
+      Top = 236
+      Width = 129
+      Height = 113
+      Caption = 'Parameters '
+      TabOrder = 19
+      Visible = False
+      object lblThetaPareto: TLabel
+        Left = 8
+        Top = 20
+        Width = 31
+        Height = 13
+        Caption = 'Theta:'
+      end
+      object lblAPareto: TLabel
+        Left = 8
+        Top = 64
+        Width = 9
+        Height = 13
+        Caption = 'a:'
+        WordWrap = True
+      end
+      object reThetaPareto: TREEdit
+        Left = 8
+        Top = 36
+        Width = 65
+        Height = 21
+        EditAlign = eaLeft
+        TabOrder = 0
+      end
+      object reAPareto: TREEdit
+        Left = 8
+        Top = 80
+        Width = 65
+        Height = 21
+        EditAlign = eaLeft
+        TabOrder = 1
+      end
+    end
+    object grpInvGaussian: TGroupBox
+      Left = 288
+      Top = 468
+      Width = 129
+      Height = 113
+      Caption = 'Parameters '
+      TabOrder = 20
+      Visible = False
+      object lblMeanInvGaussian: TLabel
+        Left = 8
+        Top = 20
+        Width = 30
+        Height = 13
+        Caption = 'Mean:'
+      end
+      object lblShapeInvGaussian: TLabel
+        Left = 8
+        Top = 64
+        Width = 34
+        Height = 13
+        Caption = 'Shape:'
+        WordWrap = True
+      end
+      object reMeanInvGaussian: TREEdit
+        Left = 8
+        Top = 36
+        Width = 65
+        Height = 21
+        EditAlign = eaLeft
+        TabOrder = 0
+      end
+      object reShapeInvGaussian: TREEdit
+        Left = 8
+        Top = 80
+        Width = 65
+        Height = 21
+        EditAlign = eaLeft
+        TabOrder = 1
+      end
+    end
+    object grpBernoulli: TGroupBox
+      Left = 144
+      Top = 528
+      Width = 129
+      Height = 69
+      Caption = 'Parameter '
+      TabOrder = 21
+      Visible = False
+      object lblPBernoulli: TLabel
+        Left = 8
+        Top = 20
+        Width = 9
+        Height = 13
+        Caption = 'p:'
+      end
+      object rePBernoulli: TREEdit
+        Left = 8
+        Top = 36
+        Width = 65
+        Height = 21
+        EditAlign = eaLeft
+        TabOrder = 0
+      end
+    end
   end
   object pnlCbos: TPanel
     Left = 0
     Top = 0
-    Width = 747
+    Width = 833
     Height = 97
     Align = alTop
     TabOrder = 0

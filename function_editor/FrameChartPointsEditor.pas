@@ -4,13 +4,13 @@ unit FrameChartPointsEditor;
 FrameChartPointsEditor.pas/dfm
 -------------------------------
 Begin: 2005/11/10
-Last revision: $Date: 2008/11/25 22:05:57 $ $Author: areeves $
-Version number: $Revision: 1.1 $
-Project: NAADSM and related applications
-Website: http://www.naadsm.org
-Author: Aaron Reeves <Aaron.Reeves@colostate.edu>
+Last revision: $Date: 2013-06-27 19:11:22 $ $Author: areeves $
+Version number: $Revision: 1.14.4.9 $
+Project: APHI Delphi Library for Simulation Modeling
+Website: http://www.naadsm.org/opensource/libaphi/
+Author: Aaron Reeves <Aaron.Reeves@ucalgary.ca>
 --------------------------------------------------
-Copyright (C) 2005 - 2008 Animal Population Health Institute, Colorado State University
+Copyright (C) 2005 - 2011 Colorado State University
 
 This program is free software; you can redistribute it and/or modify it under the terms of the GNU General
 Public License as published by the Free Software Foundation; either version 2 of the License, or
@@ -52,7 +52,7 @@ interface
     RelFunction,
     ProbDensityFunctions,
 
-    // Widgets
+    // The base class
     FrameChartBase
   ;
   
@@ -62,17 +62,20 @@ interface
       pnlChart: TPanel;
       pnlCumulativeContainer: TPanel;
       pnlCumulative: TPanel;
-      cbxShowCumProb: TCheckBox;
+      cbxShowCumulProb: TCheckBox;
       chartMain: TChart;
-      seriesPDF: TAreaSeries;
-      seriesCumulative: TFastLineSeries;
-      SeriesREL: TLineSeries;
+      serPDFContinuous: TAreaSeries;
+      serPdfDiscrete: TBarSeries;
+      serPdfCumulative: TFastLineSeries;
+      serPdfDiscreteApprox: TBarSeries;
+      serREL: TLineSeries;
       PopupMenu: TPopupMenu;
       mnuAddPoint: TMenuItem;
       mnuRemovePoint: TMenuItem;
 
       lblErrorMessage: TLabel;
       serYAxisMarker: TLineSeries;
+      cbxShowDiscreteApprox: TCheckBox;
 
       // Popup menu
       //------------
@@ -85,13 +88,14 @@ interface
       procedure chartMainMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
       procedure chartMainMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 
-      procedure cbxShowCumProbClick(Sender: TObject);
+      procedure cbxShowCumulProbClick(Sender: TObject);
 
     protected
       // Properties
       //------------
       _xAxisUnits: TChartUnitType;
       _yAxisUnits: TChartUnitType;
+      _xAxisLabel: string; // Used for custom types
       _title: string;
 
       _chartType: TChartType;
@@ -128,7 +132,7 @@ interface
       function getMinVal(): double;
       function getMaxVal(): double;
 
-      procedure initialize( AOwner: TComponent );
+      procedure initialize();
       procedure showHideChart( shouldShow: boolean );
 
       // Used with the table for editing points.
@@ -140,6 +144,7 @@ interface
       procedure setChartType( const val: TChartType );
       procedure setXAxisUnits( const val: TChartUnitType );
       procedure setYAxisUnits( const val: TChartUnitType );
+      procedure setXAxisLabel( const val: string );
 
       procedure setFnNames( val: TStrings );
 
@@ -157,33 +162,31 @@ interface
 
       function getChartType(): TChartType;
 
-      
-      // Some useful helper functions
-      // FIX ME: some of these might
-      // make useful nonGUI functions some day
+      // Chart-drawing functions
+      //-------------------------
+      procedure drawChartPdf( const chart: TPdf );
+      procedure drawChartRel( const chart: TRelFunction );
+      procedure adjustAxes();
+      procedure plotPdfCumulContinuous();
+      procedure plotPdfCumulDiscrete();
+
+      // Mark Schoenbaum's original chart drawing functions
+      // FIX ME: some of these might make useful nonGUI functions some day
       //-----------------------------------------
-      procedure FillPointsFromSeries(S: TChartSeries; var P: RPointArray );
+      procedure FillPointsFromSeries( var P: RPointArray );
 
       function GetIntervalArea( P1, P2: RPoint ): double;
       function AreaUnderPDFCurveIsOneOK( var P: RPointArray ): boolean;
 
-      function StandardizePDFSeries(
-        Series: TChartSeries;
-        C: TChart
-      ): boolean;
+      function StandardizePDFSeries(): boolean;
 
       procedure CalculateIntervalProbabilities(
         P: RPointArray;
         var intervalAreas: array of double;
         var TotalArea: double
       );
+      procedure GetTidBitArea( var TidBitArea: double; var TidBitPnt, P1, P2: RPoint );
 
-      // Chart-drawing functions
-      //-------------------------
-      procedure plotCumulative( CumlSeries, DensitySeries: TChartSeries );
-      procedure GetTidBitArea( var TidBitArea: double; var TidBitPnt, P1, P2: RPoint );      
-
-      
       // Functions for (I think) editing points
       //---------------------------------------
       function ValuePerPixel(A : TChartAxis) : real;
@@ -202,26 +205,17 @@ interface
       function createChart(): TChartFunction;
       function chartPoints(): RPointArray;
 
-      procedure copyChart( const chart: TChartFunction ); overload;
-      procedure copyChart( const chart: TPdf ); overload;
-      procedure copyChart( const chart: TRelFunction ); overload;
+      procedure drawChart( const chart: TChartFunction );
+      procedure drawDiscreteApprox( const fn: TPdf );
 
       procedure showChart();
       procedure hideChart( msg: string = '' );
 
       procedure setUpdateParams( fn: TUpdateParamsEvent );
 
-      //procedure setForm( frm: TForm );
-
-
       // Retrieving the points as an array
       //----------------------------------
       function createRPointArray(): RPointArray;
-
-
-      // Exporting points as CSV text
-      //-----------------------------
-      function pointsAsCSVToBuffer( out stringBuffer: string; out pointCount: integer ): boolean;
 
 
       // Properties
@@ -235,6 +229,7 @@ interface
 
       property xAxisUnits: TChartUnitType read getXAxisUnits write setXAxisUnits;
       property yAxisUnits: TChartUnitType read getYAxisUnits write setYAxisUnits;
+      property xAxisLabel: string write setXAxisLabel;
 
       // Deprecated: use minY and maxY
       property minVal: double read getMinVal write setMinVal;
@@ -261,8 +256,6 @@ implementation
     Math,
 
     MyStrUtils,
-    GuiStrUtils,
-    USStrUtils,
     DebugWindow,
     ControlUtils,
     MyDialogs,
@@ -278,7 +271,7 @@ implementation
     begin
       inherited create( AOwner );
       translateUI();
-      
+
       if( AOwner is TForm ) then
         _myForm := AOwner as TForm
       else
@@ -299,7 +292,8 @@ implementation
       with self do
         begin
           lblErrorMessage.Caption := tr( 'lblErrorMessage' );
-          cbxShowCumProb.Caption := tr( 'Show cumulative probability' );
+          cbxShowCumulProb.Caption := tr( 'Show cumulative probability' );
+          cbxShowDiscreteApprox.Caption := tr( 'Show discrete approximation' );
           mnuAddPoint.Caption := tr( 'Add point' );
           mnuRemovePoint.Caption := tr( 'Remove point' );
         end
@@ -328,10 +322,13 @@ implementation
 
 
 
-  procedure TFrameChartPointsEditor.initialize( AOwner: TComponent );
+  procedure TFrameChartPointsEditor.initialize();
     begin
-      seriesPDF.clear();
-      seriesREL.clear();
+      serPDFContinuous.clear();
+      serPdfDiscrete.clear();
+      serPdfCumulative.clear();
+      serPdfDiscreteApprox.Clear();
+      serREL.clear();
     end
   ;
 //-----------------------------------------------------------------------------
@@ -339,70 +336,156 @@ implementation
 
 
 //-----------------------------------------------------------------------------
-// copyChart functions
+// Functions for copying charts
 //-----------------------------------------------------------------------------
-  // FIX ME: merge the these functions.  They are 90% identical.
-  procedure TFrameChartPointsEditor.copyChart( const chart: TChartFunction );
+  procedure TFrameChartPointsEditor.drawChart( const chart: TChartFunction );
     begin
-      if( chart is TPdf ) then
-        copyChart( chart as TPdf )
-      else if( chart is TRelFunction ) then
-        copyChart( chart as TRelFunction )
-      ;
-    end
-  ;
+      screen.Cursor := crHourglass;
 
+      initialize();
 
-  // FIX ME: merge this function with the function below
-  procedure TFrameChartPointsEditor.copyChart( const chart: TPdf );
-    var
-      i: integer;
-      pointArr: T2DPointList;
-      range, min, max: double;
-    begin
-      setChartType( CTPdf );
-      adjustPDFAuto := true;
-
-      seriesPDF.Clear();
-      seriesREL.clear();
-
-      _workingSeries := seriesPDF;
-
-      setXAxisUnits( chart.xUnits );
-      setYAxisUnits( UnitsUnitless );
       chartMain.Title.Text.Clear();
       chartMain.Title.Text.Append( chart.descr );
 
-      if( chart is TPdfPiecewise ) then
+      setXAxisUnits( chart.xUnits );
+
+      if( chart is TPdf ) then
         begin
-          if( 3 > (chart as TPdfPiecewise).pointCount ) then
+          setChartType( CTPdf );
+          adjustPDFAuto := true;
+
+          if( chart is TPdfContinuous ) then
             begin
-              pointArr := T2DPointList.Create();
-              pointArr.Append( T2DPoint.create( 0.0, 0.0 ) );
-              pointArr.Append( T2DPoint.create( 3.0, 0.4 ) );
-              pointArr.Append( T2DPoint.create( 5.0, 0.0 ) );
+              _workingSeries := serPDFContinuous;
+              cbxShowDiscreteApprox.Visible := true;
             end
           else
-            pointArr := chart.createPointArray()
+            begin
+              _workingSeries := serPdfDiscrete;
+              cbxShowDiscreteApprox.Visible := false;
+            end
+          ;
+
+          setYAxisUnits( UUnitless );
+
+          drawChartPdf( chart as TPdf );
+
+          if( chart is TPdfContinuous ) then
+            drawDiscreteApprox( chart as TPdf )
+          else
+            serPdfDiscreteApprox.Clear()
+          ;
+          
+          adjustAxes();
+
+          cbxShowCumulProbClick( nil );
+        end
+      else if( chart is TRelFunction ) then
+        begin
+          cbxShowDiscreteApprox.Visible := false;
+
+          setChartType( CTRel );
+          _workingSeries := serREL;
+          setYAxisUnits( chart.yUnits );
+
+          drawChartRel( chart as TRelFunction );
+          adjustAxes();
+        end
+      ;
+
+      screen.Cursor := crDefault;
+    end
+  ;
+
+
+  procedure TFrameChartPointsEditor.drawDiscreteApprox( const fn: TPdf );
+    var
+      i: integer;
+    begin
+      //dbcout2( endl + 'BEGIN TFrameChartPointsEditor.drawDiscreteApprox()' );
+
+      if( cbxShowDiscreteApprox.Checked ) then
+        begin
+          if( nil <> fn ) then
+            begin
+              if( fn.validate() ) then
+                begin
+                  for i := 0 to fn.discreteVals.count - 1 do
+                    serPdfDiscreteApprox.AddXY( fn.discreteVals.keyAtIndex(i), fn.discreteVals.itemAtIndex(i) )
+                  ;
+                end
+              else
+                serPdfDiscreteApprox.Clear()
+              ;
+            end
+          else
+            serPdfDiscreteApprox.Clear()
           ;
         end
       else
-        pointArr := chart.createPointArray()
+        serPdfDiscreteApprox.Clear()
       ;
 
-      dbcout( '*** points in chart: ' + intToStr( pointArr.Count ), DBFRAMECHARTPOINTSEDITOR );
+      adjustAxes();
 
-      for i := 0 to pointArr.Count - 1 do
-        _workingSeries.addXY( pointArr.Point[i].x, pointArr.Point[i].y )
+      //dbcout2( 'DONE TFrameChartPointsEditor.drawDiscreteApprox()' );
+    end
+  ;
+
+
+  procedure TFrameChartPointsEditor.plotPdfCumulDiscrete();
+    var
+      vals: TMassHistogramValues;
+      i: integer;
+      nextY: double;
+    begin
+      serPdfCumulative.Clear();
+
+      vals := TMassHistogramValues.create();
+
+      vals.append( TMassHistogramValue.create( serPdfDiscrete.XValue[0], serPdfDiscrete.YValue[0] ) );
+      
+      for i := 1 to serPdfDiscrete.Count - 1 do
+        begin
+          nextY := vals.at( i - 1 ).y + serPdfDiscrete.YValue[i];
+          vals.append( TMassHistogramValue.create( serPdfDiscrete.XValue[i], nextY ) );
+        end
       ;
 
-      freeAndNil( pointArr );
+      for i := 0 to vals.Count - 1 do
+        begin
+          serPdfCumulative.AddXY( vals.at(i).x, vals.at(i).y );
+          if( i < vals.Count - 1 ) then
+            serPdfCumulative.AddXY( vals.at(i+1).x, vals.at(i).y )
+          ;
+        end
+      ;
 
+      freeAndNil( vals );
+    end
+  ;
+
+
+  procedure TFrameChartPointsEditor.adjustAxes();
+    var
+      range, min, max: double;
+    begin
       // Pad the X axis a bit, if needed
-      //---------------------------------
-      range := _workingSeries.XValues.MaxValue - _workingSeries.XValues.MinValue;
-      min := _workingSeries.XValues.MinValue - ( range / 10 );
-      max := _workingSeries.XValues.MaxValue + ( range / 10 );
+      //--------------------------------
+      if( ( serPdfContinuous = _workingSeries ) and cbxShowDiscreteApprox.Checked ) then
+        begin
+          min := math.min( serPdfContinuous.MinXValue, serPdfDiscreteApprox.MinXValue );
+          max := math.max( serPdfContinuous.MaxXValue, serPdfDiscreteApprox.MaxXValue );
+        end
+      else
+        begin
+          min := _workingSeries.XValues.MinValue;
+          max := _workingSeries.XValues.MaxValue;
+        end
+      ;
+      range := max - min;
+      min := min - ( range / 10 );
+      max := max + ( range / 10 );
 
       setMinMaxY();
 
@@ -414,31 +497,69 @@ implementation
       else
         _workingSeries.GetHorizAxis.SetMinMax( min, max )
       ;
-
-      cbxShowCumProbClick( nil );
     end
   ;
 
 
-  // FIX ME: merge this function with the function above
-  procedure TFrameChartPointsEditor.copyChart( const chart: TRelFunction );
+  procedure TFrameChartPointsEditor.drawChartPdf( const chart: TPdf );
+    var
+      i: integer;
+      pointArr: T2DPointList;
+    begin
+      // Continuous types
+      //-----------------
+      if( chart is TPdfContinuous ) then
+        begin
+          // Get the point array
+          //---------------------
+          if( chart is TPdfPiecewise ) then
+            begin
+              if( 3 > (chart as TPdfPiecewise).pointCount ) then
+                begin
+                  pointArr := T2DPointList.Create();
+                  pointArr.Append( T2DPoint.create( 0.0, 0.0 ) );
+                  pointArr.Append( T2DPoint.create( 3.0, 0.4 ) );
+                  pointArr.Append( T2DPoint.create( 5.0, 0.0 ) );
+                end
+              else if( chart is TPdfContinuous ) then
+                pointArr := ( chart as TPdfContinuous ).createPointArray()
+              else
+                raise exception.Create( 'Fix me in FrameChartPointsEditor!' )
+              ;
+            end
+          else if( chart is TPdfContinuous ) then
+            pointArr := ( chart as TPdfContinuous ).createPointArray()
+          ;
+
+          // Draw the chart using the point array
+          //-------------------------------------
+          for i := 0 to pointArr.Count - 1 do
+            serPDFContinuous.addXY( pointArr.Point[i].x, pointArr.Point[i].y )
+          ;
+
+          freeAndNil( pointArr );
+        end
+
+      // Discrete types
+      //---------------
+      else
+        begin
+          pointArr := (chart as TPdfDiscrete).massHistogramValues;
+          
+          for i := 0 to pointArr.Count - 1 do
+            serPdfDiscrete.AddXY( pointArr.at(i).x, pointArr.at(i).y )
+          ;
+        end
+      ;
+    end
+  ;
+
+
+  procedure TFrameChartPointsEditor.drawChartRel( const chart: TRelFunction );
     var
       i: integer;
       adjY: double;
-      range, min, max: double;
     begin
-      setChartType( CTRel );
-
-      seriesPDF.Clear();
-      seriesREL.clear();
-
-      _workingSeries := seriesREL;
-
-      setXAxisUnits( chart.xUnits );
-      setYAxisUnits( chart.yUnits );
-      chartMain.Title.Text.Clear();
-      chartMain.Title.Text.Append( chart.descr );
-
       if( 0 = chart.pointCount ) then
         begin
           // FIX ME: deal with the maxVal stuff
@@ -471,23 +592,6 @@ implementation
           ;
         end
       ;
-
-      // Pad the X axis a bit, if needed
-      //---------------------------------
-      range := _workingSeries.XValues.MaxValue - _workingSeries.XValues.MinValue;
-      min := _workingSeries.XValues.MinValue - ( range / 10 );
-      max := _workingSeries.XValues.MaxValue + ( range / 10 );
-
-      setMinMaxY();
-
-      // The following IF statements correct for a known bug in TChart
-      // See http://www.teechart.net/support/modules.php?name=Newsgroups&file=article&id=924&group=steema.public.teechart6.delphi
-      //---------------------------------------------------------------
-      if( _workingSeries.XValues.MaxValue = _workingSeries.XValues.MinValue ) then
-        _workingSeries.GetHorizAxis.setMinMax( _workingSeries.XValues.MinValue - 1.0, _workingSeries.XValues.MinValue + 1.0 )
-      else
-        _workingSeries.GetHorizAxis.SetMinMax( min, max )
-      ;
     end
   ;
 //-----------------------------------------------------------------------------
@@ -514,6 +618,7 @@ implementation
     end
   ;
 
+
   procedure TFrameChartPointsEditor.showHideChart( shouldShow: boolean );
     begin
       if( shouldShow ) then
@@ -537,21 +642,26 @@ implementation
   ;
 
 
-  procedure TFrameChartPointsEditor.cbxShowCumProbClick(Sender: TObject);
+  procedure TFrameChartPointsEditor.cbxShowCumulProbClick(Sender: TObject);
     begin
-      if cbxShowCumProb.Checked then
+      if( cbxShowCumulProb.Checked ) then
         begin
-          PlotCumulative( seriesCumulative, _workingSeries );
-          setMinMaxY();
+          if( serPdfContinuous = _workingSeries ) then
+            plotPdfCumulContinuous()
+          else if( serPdfDiscrete = _workingSeries ) then
+            plotPdfCumulDiscrete()
+          else
+            raise exception.Create( 'Wrong _workingSeries in TFrameChartPointsEditor.cbxShowCumProbClick' )
+          ;
         end
       else
-        begin
-          seriesCumulative.Clear();
-          setMinMaxY();
-        end
+        serPdfCumulative.Clear()
       ;
+
+      adjustAxes();
     end
   ;
+
 
   procedure TFrameChartPointsEditor.setMinMaxY();
     var
@@ -561,16 +671,17 @@ implementation
       // The following IF statement corrects for a known bug in TChart
       // See http://www.teechart.net/support/modules.php?name=Newsgroups&file=article&id=924&group=steema.public.teechart6.delphi
       //---------------------------------------------------------------
-      min := _workingSeries.YValues.MinValue;
+      min := 0.0; //_workingSeries.YValues.MinValue;
       max := _workingSeries.YValues.MaxValue;
 
-      dbcout( 'Y scale min = ' + uiFloatToStr( min ) + ', max = ' + uiFloatToStr( max ), DBFRAMECHARTPOINTSEDITOR );
+      dbcout( 'Y scale min = ' + dbFloatToStr( min ) + ', max = ' + dbFloatToStr( max ), DBFRAMECHARTPOINTSEDITOR );
 
       if( CTPdf = _chartType ) then
         begin
-          if( ( cbxShowCumProb.checked ) and ( 1 > max ) ) then
-            max := 1
+          if( ( cbxShowCumulProb.checked ) and ( 1.02 > max ) ) then
+            max := 1.02
           (*
+          // AR 4/15/10 This block has been commented out for quite a while.  It can probably go away.
           else if( _workingSeries.YValues.MaxValue = _workingSeries.YValues.MinValue ) then
             begin
               y10pct := _workingSeries.YValues.MaxValue / 10;
@@ -579,17 +690,20 @@ implementation
               max := _workingSeries.YValues.MaxValue + y10pct;
             end
           *)
+          (*
+          // AR 4/15/10 This block seems undesirable.  I can't remember why it was ever here in the first place.
           else if( 100 < _workingSeries.YValues.MaxValue - _workingSeries.YValues.MinValue ) then
             begin
-              dbcout( 'Limiting max to ' + uiFloatToStr( 100 * _workingSeries.YValues.MinValue ), DBFRAMECHARTPOINTSEDITOR );
+              dbcout( 'Limiting max to ' + dbFloatToStr( 100 * _workingSeries.YValues.MinValue ), DBFRAMECHARTPOINTSEDITOR );
               min := 0.0;
               max := 100 * _workingSeries.YValues.MinValue;
             end
+          *)
           else
             begin
               min := 0.0;
               y10pct := _workingSeries.YValues.MaxValue / 10;
-              if( 0.01 > y10pct ) then y10pct := 0.01;
+              //if( 0.01 > y10pct ) then y10pct := 5 * y10pct;  // AR 4/15/10 This line seems undesirable.
               max := _workingSeries.YValues.MaxValue + y10pct;
             end
           ;
@@ -604,7 +718,7 @@ implementation
       serYAxisMarker.Clear();
       serYAxisMarker.AddXY( 0, 0 );
 
-      if( cbxShowCumProb.Checked ) then
+      if( cbxShowCumulProb.Checked ) then
         begin
           if( 1 > max ) then max := 1;
         end
@@ -627,20 +741,23 @@ implementation
       pdf: TPdfPiecewise;
       rel: TRelFunction;
       i: integer;
+      arr: RPointArray;
     begin
+      setLength( arr, _workingSeries.Count );
+
+      for i := 0 to _workingSeries.Count - 1 do
+        begin
+          arr[i].x := _workingSeries.xvalue[i];
+          arr[i].y := _workingSeries.yvalue[i];
+        end
+      ;
+
     	case _chartType of
       	CTPdf:
         	begin
-            pdf := TPdfPiecewise.create();
-
-            for i := 0 to _workingSeries.Count-1 do
-              pdf.addPoint( _workingSeries.xvalue[i], _workingSeries.yvalue[i] )
-            ;
-
-            pdf.xUnits := xAxisUnits;
+            pdf := TPdfPiecewise.create( arr, xAxisUnits );
             pdf.name := tr( '(Unnamed PDF)' );
-
-            result := pdf
+            result := pdf;
           end
         ;
         CTRel:
@@ -690,63 +807,12 @@ implementation
 
 
 //-----------------------------------------------------------------------------
-// CSV output
-//-----------------------------------------------------------------------------
-  function TFrameChartPointsEditor.pointsAsCSVToBuffer( out stringBuffer: string; out pointCount: integer ): boolean;
-    var
-      i: integer;
-      sep: string;
-    begin
-      sep := ',';
-      if
-        ( CTUnspecified =  _chartType )
-      or
-        ( 0 = _workingSeries.Count )
-      then
-        begin
-          stringBuffer := '';
-          pointCount := 0;
-          result := false;
-        end
-      else
-        begin
-          try
-            stringBuffer := 'x' + sep + ' y' + endl;
-
-            for i := 0 to _workingSeries.Count-1 do
-              begin
-                stringBuffer :=
-                  stringBuffer
-                  + usFloatToStr( _workingSeries.xvalue[i] )
-                  + sep + ' '
-                  + usFloatToStr( _workingSeries.yvalue[i] )
-                  + endl
-                ;
-              end
-            ;
-
-            pointCount := _workingSeries.Count;
-            result := true;
-          except
-            stringBuffer := '';
-            pointCount := 0;
-            result := false;
-          end;
-        end
-      ;
-    end
-  ;
-//-----------------------------------------------------------------------------
-
-
-//-----------------------------------------------------------------------------
 // Functions for editing chart points
 // ----------------------------------------------------------------------------
   procedure TFrameChartPointsEditor.mnuAddPointClick( Sender: TObject );
     var
       x, y: real;
     begin
-
       if isReadOnly then exit;
 
       x := chartMain.BottomAxis.CalcPosPoint( _MousePos.X );
@@ -754,10 +820,10 @@ implementation
       _workingSeries.AddXY( x, y );
 
       if( isPDFFunction and AdjustPDFAuto ) then
-        StandardizePDFSeries( _workingSeries, chartMain )
+        StandardizePDFSeries()
       ;
       if PlottingCumulative then
-        PlotCumulative( seriesCumulative, _workingSeries )
+        plotPdfCumulContinuous()
       ;
 
       setMinMaxY();
@@ -770,7 +836,9 @@ implementation
 
       _chartChanged := True;
 
-      if( nil <> @_updateFunctionParams ) then _updateFunctionParams( self, nil );
+      if( nil <> @_updateFunctionParams ) then
+        _updateFunctionParams( self, nil )
+      ;
     end
   ;
 
@@ -918,10 +986,10 @@ implementation
               ;
 
               if( isPDFFunction and AdjustPDFAuto ) then
-              	StandardizePDFSeries( _workingSeries, chartMain )
+              	StandardizePDFSeries()
               ;
               if PlottingCumulative then
-              	PlotCumulative( seriesCumulative, _workingSeries )
+              	plotPdfCumulContinuous()
               ;
 
               if( not( plottingCumulative ) ) then
@@ -936,7 +1004,9 @@ implementation
                 end
               ;
 
-              if( nil <> @_updateFunctionParams ) then _updateFunctionParams( self, nil );
+              if( nil <> @_updateFunctionParams ) then
+                _updateFunctionParams( self, nil )
+              ;
               
               _chartChanged := True;
             end
@@ -993,10 +1063,10 @@ implementation
       _workingSeries.Delete( _DragPnt );
 
       if( isPDFFunction and AdjustPDFAuto ) then
-        StandardizePDFSeries( _workingSeries, chartMain )
+        StandardizePDFSeries()
       ;
       if PlottingCumulative then
-        PlotCumulative( seriesCumulative, _workingSeries )
+        plotPdfCumulContinuous()
       ;
 
       if( not( plottingCumulative ) ) then
@@ -1013,7 +1083,9 @@ implementation
 
       _chartChanged := True;
 
-      if( nil <> @_updateFunctionParams ) then _updateFunctionParams( self, nil );
+      if( nil <> @_updateFunctionParams ) then
+        _updateFunctionParams( self, nil )
+      ;
     end
   ;
 
@@ -1024,8 +1096,12 @@ implementation
       S.XValue[Pnt] := P[Pnt].X;
       S.YValue[Pnt] := P[Pnt].Y;
 
-      if isPDFFunction and AdjustPDFAuto then StandardizePDFSeries( S, chartMain );
-      if PlottingCumulative then PlotCumulative( seriesCumulative, S );
+      if( isPDFFunction and AdjustPDFAuto ) then
+        StandardizePDFSeries()
+      ;
+      if( PlottingCumulative ) then
+        plotPdfCumulContinuous()
+      ;
 
       if( not( plottingCumulative ) ) then
         begin
@@ -1061,8 +1137,12 @@ implementation
         S.AddXY(P[i].X,P[i].Y)
       ;
 
-      if isPDFFunction and AdjustPDFAuto then StandardizePDFSeries( S, chartMain );
-      if PlottingCumulative then PlotCumulative( seriesCumulative, S );
+      if( isPDFFunction and AdjustPDFAuto )
+        then StandardizePDFSeries()
+      ;
+      if PlottingCumulative then
+        plotPdfCumulContinuous()
+      ;
 
       if( not( plottingCumulative ) ) then
         begin
@@ -1290,59 +1370,68 @@ implementation
   ;
 
 
-  procedure TFrameChartPointsEditor.PlotCumulative( CumlSeries, DensitySeries: TChartSeries );
+  procedure TFrameChartPointsEditor.plotPdfCumulContinuous();
     const
       Points = 30;
     var
       P : RPointArray;
       A : array of double;
       interval, intx, TotalArea : double;
-      i : longint;
+      i : integer;
     begin
-      CumlSeries.Clear;
-      FillPointsFromSeries(DensitySeries, P);
-      try
-        SetLength(A, Length(P));
+      serPdfCumulative.Clear();
 
-        try
-          CalculateIntervalProbabilities(P, A, TotalArea);
-          interval := (P[High(P)].X - P[Low(P)].X)/(Points-1);
-          CumlSeries.AddXY(P[Low(P)].X,0);
+      // Continuous types are handled here.
+      // Discrete types are handled by function plotCumulativeDiscrete.
+      if( serPdfContinuous = _workingSeries ) then
+        begin
+          FillPointsFromSeries( P );
+          try
+            SetLength(A, Length(P));
 
-          for i := 2 to Points - 1 do
-            begin
-              intX := P[Low(P)].X + ((i-1)*Interval);
-              PlotPoint(intX, P, A, cumlSeries );
-            end
-          ;
+            try
+              CalculateIntervalProbabilities( P, A, TotalArea );
+              interval := (P[High(P)].X - P[Low(P)].X)/(Points-1);
+              serPdfCumulative.AddXY(P[Low(P)].X,0);
 
-          CumlSeries.AddXY(P[High(P)].X,1);
+              for i := 2 to Points - 1 do
+                begin
+                  intX := P[Low(P)].X + ((i-1)*Interval);
+                  PlotPoint(intX, P, A, serPdfCumulative );
+                end
+              ;
 
-          if( _workingSeries.GetVertAxis.Maximum < 1 ) then
-            CumlSeries.GetVertAxis.Maximum := 1.0
-          ;
-        finally
-          A := nil;
-        end;
+              serPdfCumulative.AddXY(P[High(P)].X,1);
 
-      finally
-        P := nil;
-      end;
+              if( _workingSeries.GetVertAxis.Maximum < 1 ) then
+                serPdfCumulative.GetVertAxis.Maximum := 1.0
+              ;
+            finally
+              A := nil;
+            end;
+
+          finally
+            P := nil;
+          end;
+        end
+      else
+        raise exception.create( 'Something screwy happened in TFrameChartPointsEditor.PlotCumulative()' )
+      ;
     end
   ;
 
 
-  procedure TFrameChartPointsEditor.FillPointsFromSeries(S: TChartSeries; var P: RPointArray );
+  procedure TFrameChartPointsEditor.FillPointsFromSeries( var P: RPointArray );
     var
       i : longint;
     begin
       P := nil;
 
-      for i := 0 to S.Count - 1 do
+      for i := 0 to serPdfContinuous.Count - 1 do
         begin
           SetLength(P, Length(P) + 1);
-          P[High(P)].X := S.XValue[i];
-          P[High(P)].Y := S.YValue[i];
+          P[High(P)].X := serPdfContinuous.XValue[i];
+          P[High(P)].Y := serPdfContinuous.YValue[i];
         end
       ;
     end
@@ -1369,15 +1458,12 @@ implementation
   ;
 
   
-  function TFrameChartPointsEditor.StandardizePDFSeries(
-        Series: TChartSeries;
-        C: TChart
-      ): boolean;
+  function TFrameChartPointsEditor.StandardizePDFSeries(): boolean;
     var
       p : RPointArray;
       i: longint;
     begin
-      FillPointsFromSeries( Series, P );
+      FillPointsFromSeries( P );
 
       try
         Result := True;
@@ -1385,9 +1471,9 @@ implementation
         if( TPdfPiecewise.standardize(P) ) then
           begin
             // Put PDF in series
-            series.Clear();
+            serPdfContinuous.Clear();
             for i := Low(P) to High(P) do
-              series.AddXY(P[i].X,P[i].Y)
+              serPdfContinuous.AddXY(P[i].X,P[i].Y)
             ;
           end
         else
@@ -1418,8 +1504,9 @@ implementation
       	CTPdf:
         	begin
           	setAdjustPDFAuto( true );
-          	_workingSeries := seriesPDF;
-            cbxShowCumProb.visible := true;
+            _workingSeries := serPDFContinuous;
+            cbxShowCumulProb.visible := true;
+            cbxShowDiscreteApprox.Visible := true;
             pnlCumulativeContainer.Visible := true;
             //_workingSeries.addXY( 0, 0 );
             //_workingSeries.addXY( 8.37931060791016, 0.133333333333333 );
@@ -1429,16 +1516,17 @@ implementation
         CTRel:
         	begin
             dbcout( 'rel chart should show', DBFRAMECHARTPOINTSEDITOR );
-          	_workingSeries := seriesRel;
-            cbxShowCumProb.Visible := false;
+          	_workingSeries := serRel;
+            cbxShowCumulProb.Visible := false;
+            cbxShowDiscreteApprox.Visible := false;
             pnlCumulativeContainer.Visible := false;
             showChart();
           end
         ;
         CTUnspecified:
           begin
-            setXAxisUnits( UnitsUnknown );
-            setYAxisUnits( UnitsUnknown );
+            setXAxisUnits( UUnknown );
+            setYAxisUnits( UUnknown );
 
             _minVal := 0.0;
             _maxVal := 0.0;
@@ -1463,7 +1551,18 @@ implementation
 	procedure TFrameChartPointsEditor.setXAxisUnits( const val: TChartUnitType );
   	begin
    		_xAxisUnits := val;
-      chartMain.BottomAxis.Title.Caption := capitalize( chartUnitTypeAsString( val ) );
+
+      if( UCustom = val ) then
+        begin
+          if( strIsEmpty( _xAxisLabel ) ) then
+            chartMain.BottomAxis.Title.Caption := capitalize( chartUnitTypeAsString( val ) )
+          else
+            chartMain.BottomAxis.Title.Caption := _xAxisLabel
+          ;
+        end
+      else
+        chartMain.BottomAxis.Title.Caption := capitalize( chartUnitTypeAsString( val ) )
+      ;
     end
   ;
 
@@ -1472,7 +1571,7 @@ implementation
   	begin
    		_yAxisUnits := val;
 
-      if( UnitsUnitless <> val ) then
+      if( UUnitless <> val ) then
       	chartMain.LeftAxis.Title.Caption := capitalize( chartUnitTypeAsString( val ) )
       else
       	chartMain.LeftAxis.Title.Caption := ''
@@ -1481,12 +1580,21 @@ implementation
   ;
 
 
+  procedure TFrameChartPointsEditor.setXAxisLabel( const val: string );
+    begin
+      _xAxisUnits := UCustom;
+      _xAxisLabel := val;
+      chartMain.BottomAxis.Title.Caption := val;
+    end
+  ;
+
+
   procedure TFrameChartPointsEditor.setIsReadOnly( const val: boolean );
     begin
       _isReadOnly := val;
       popupMenu.AutoPopup := (not val );
-      seriesPDF.Pointer.Visible := ( not val );
-      seriesREL.Pointer.Visible := ( not val );
+      serPDFContinuous.Pointer.Visible := ( not val );
+      serREL.Pointer.Visible := ( not val );
     end
   ;
 
@@ -1502,7 +1610,7 @@ implementation
   function TFrameChartPointsEditor.getIsRelFunction(): boolean; begin result := (_chartType = CTRel ); end;
   function TFrameChartPointsEditor.getIsReadOnly(): boolean; begin result := _isReadOnly; end;
   function TFrameChartPointsEditor.getSaveChanges(): boolean; begin result := _saveChanges; end;
-	function TFrameChartPointsEditor.getPlottingCumulative(): boolean; begin result := cbxShowCumProb.Visible and cbxShowCumProb.Checked; end;
+	function TFrameChartPointsEditor.getPlottingCumulative(): boolean; begin result := cbxShowCumulProb.Visible and cbxShowCumulProb.Checked; end;
 
   procedure TFrameChartPointsEditor.setAdjustPdfAuto( val: boolean ); begin _adjustPdfAuto := val; end;
 
@@ -1670,6 +1778,8 @@ implementation
   ;
 *)
 //-----------------------------------------------------------------------------
+
+
 
 
 

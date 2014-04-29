@@ -1,39 +1,106 @@
 inherited FrameArrayHistogram: TFrameArrayHistogram
   Width = 660
-  Height = 420
-  object pnlControls: TPanel
+  Height = 473
+  object chtHistogram: TChart
     Left = 0
-    Top = 389
+    Top = 0
     Width = 660
-    Height = 31
-    Align = alBottom
-    BevelOuter = bvLowered
+    Height = 388
+    BackWall.Brush.Color = clWhite
+    BackWall.Brush.Style = bsClear
+    Title.Text.Strings = (
+      'TChart')
+    BottomAxis.Title.Caption = 'Output value'
+    LeftAxis.Title.Caption = 'Frequency'
+    Legend.Visible = False
+    Align = alClient
+    BevelOuter = bvNone
     TabOrder = 0
-    object lblHistoBins: TLabel
+    object serHistogram: TAreaSeries
+      Marks.ArrowLength = 8
+      Marks.Visible = False
+      SeriesColor = clBlue
+      Title = 'serHistogram2'
+      DrawArea = True
+      Pointer.InflateMargins = True
+      Pointer.Style = psRectangle
+      Pointer.Visible = False
+      XValues.DateTime = False
+      XValues.Name = 'X'
+      XValues.Multiplier = 1.000000000000000000
+      XValues.Order = loAscending
+      YValues.DateTime = False
+      YValues.Name = 'Y'
+      YValues.Multiplier = 1.000000000000000000
+      YValues.Order = loNone
+    end
+  end
+  object gbxBreaks: TGroupBox
+    Left = 0
+    Top = 408
+    Width = 660
+    Height = 65
+    Align = alBottom
+    Caption = 'Number of histogram bins:'
+    TabOrder = 1
+    object rdoSturges: TRadioButton
       Left = 16
-      Top = 10
-      Width = 122
-      Height = 13
-      Caption = 'Number of histogram bins:'
+      Top = 40
+      Width = 113
+      Height = 17
+      Caption = 'Sturges algorithm'
+      TabOrder = 2
+      OnClick = rdoBinNumberClick
+    end
+    object rdoScott: TRadioButton
+      Left = 16
+      Top = 20
+      Width = 145
+      Height = 17
+      Caption = 'Scott algorithm'
+      Checked = True
+      TabOrder = 0
+      TabStop = True
+      OnClick = rdoBinNumberClick
+    end
+    object rdoFD: TRadioButton
+      Left = 168
+      Top = 20
+      Width = 193
+      Height = 17
+      Caption = 'Freedman-Diaconis algorithm'
+      TabOrder = 1
+      OnClick = rdoBinNumberClick
+    end
+    object rdoUser: TRadioButton
+      Left = 168
+      Top = 40
+      Width = 121
+      Height = 17
+      Caption = 'User-specified'
+      TabOrder = 3
+      OnClick = rdoBinNumberClick
     end
     object rleHistoBins: TREEdit
-      Left = 224
-      Top = 5
+      Left = 304
+      Top = 37
       Width = 65
       Height = 21
       EditAlign = eaLeft
-      TabOrder = 0
+      TabOrder = 4
+      Visible = False
       OnClick = rleHistoBinsClick
       OnEnter = rleHistoBinsEnter
       OnKeyUp = rleHistoBinsKeyUp
     end
     object btnAccept: TBitBtn
-      Left = 296
-      Top = 5
+      Left = 376
+      Top = 37
       Width = 22
       Height = 22
       Enabled = False
-      TabOrder = 1
+      TabOrder = 5
+      Visible = False
       OnClick = btnAcceptClick
       Glyph.Data = {
         36060000424D3606000000000000360000002800000020000000100000000100
@@ -89,12 +156,13 @@ inherited FrameArrayHistogram: TFrameArrayHistogram
       NumGlyphs = 2
     end
     object btnCancel: TBitBtn
-      Left = 320
-      Top = 5
+      Left = 400
+      Top = 37
       Width = 22
       Height = 22
       Enabled = False
-      TabOrder = 2
+      TabOrder = 6
+      Visible = False
       OnClick = btnCancelClick
       Glyph.Data = {
         36060000424D3606000000000000360000002800000020000000100000000100
@@ -150,36 +218,24 @@ inherited FrameArrayHistogram: TFrameArrayHistogram
       NumGlyphs = 2
     end
   end
-  object chtHistogram: TChart
+  object Panel1: TPanel
     Left = 0
-    Top = 0
+    Top = 388
     Width = 660
-    Height = 389
-    BackWall.Brush.Color = clWhite
-    BackWall.Brush.Style = bsClear
-    Title.Text.Strings = (
-      'TChart')
-    BottomAxis.Title.Caption = 'Output value'
-    LeftAxis.Title.Caption = 'Frequency'
-    Legend.Visible = False
-    Align = alClient
+    Height = 20
+    Align = alBottom
     BevelOuter = bvNone
-    TabOrder = 1
-    object serHistogram: TBarSeries
-      Marks.ArrowLength = 20
-      Marks.Style = smsValue
-      Marks.Visible = False
-      SeriesColor = clBlue
-      Title = 'serHistogram'
-      BarWidthPercent = 100
-      XValues.DateTime = False
-      XValues.Name = 'X'
-      XValues.Multiplier = 1.000000000000000000
-      XValues.Order = loAscending
-      YValues.DateTime = False
-      YValues.Name = 'Bar'
-      YValues.Multiplier = 1.000000000000000000
-      YValues.Order = loNone
+    TabOrder = 2
+    object cbx3DView: TCheckBox
+      Left = 16
+      Top = 0
+      Width = 97
+      Height = 17
+      Caption = '3D view'
+      Checked = True
+      State = cbChecked
+      TabOrder = 0
+      OnClick = cbx3DViewClick
     end
   end
 end

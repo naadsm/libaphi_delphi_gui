@@ -4,18 +4,20 @@ unit FrameFunctionParams2;
 FrameFunctionParams2.pas/dfm
 ----------------------------
 Begin: 2005/11/10
-Last revision: $Date: 2008/11/25 22:05:57 $ $Author: areeves $
-Version number: $Revision: 1.1 $
-Project: NAADSM and related applications
-Website: http://www.naadsm.org
-Author: Aaron Reeves <Aaron.Reeves@colostate.edu>
+Last revision: $Date: 2013-06-27 19:11:23 $ $Author: areeves $
+Version number: $Revision: 1.23.4.10 $
+Project: APHI Delphi Library for Simulation Modeling
+Website: http://www.naadsm.org/opensource/libaphi/
+Author: Aaron Reeves <Aaron.Reeves@ucalgary.ca>
 --------------------------------------------------
-Copyright (C) 2005 - 2008 Animal Population Health Institute, Colorado State University
+Copyright (C) 2005 - 2010 Colorado State University
 
 This program is free software; you can redistribute it and/or modify it under the terms of the GNU General
 Public License as published by the Free Software Foundation; either version 2 of the License, or
 (at your option) any later version.
 *)
+
+{$INCLUDE Defs.inc}
 
 interface
 
@@ -43,7 +45,6 @@ interface
     ProbDensityFunctions,
     RelFunction,
 
-    //FrameFunctionParamsBase,
     FrameAcceptCancel,
     FramePointEditorGrid
   ;
@@ -60,6 +61,15 @@ interface
       location: double;
       scale: double;
       shape: double;
+      n: integer;
+      p: double;
+      d: integer;
+      m: integer;
+      dmin: integer;
+      dmax: integer;
+      s: integer;
+      theta: double;
+      a: double;
 
       pdfType: TPdfType;
       pdfUnits: TChartUnitType;
@@ -67,18 +77,21 @@ interface
     end
   ;
 
-
   type TFrameFunctionParams2 = class( TFrame )
-     pnlParams: TPanel;
+      pnlParams: TPanel;
+
       grpUnspecified: TGroupBox;
+
       grpPoint: TGroupBox;
       lblValuePoint: TLabel;
       reValuePoint: TREEdit;
+
       grpGaussian: TGroupBox;
       lblMeanGaussian: TLabel;
       lblStdDevGaussian: TLabel;
       reMeanGaussian: TREEdit;
       reStdDevGaussian: TREEdit;
+
       grpTriang: TGroupBox;
       lblMinTriang: TLabel;
       lblModeTriang: TLabel;
@@ -86,6 +99,7 @@ interface
       reMinTriang: TREEdit;
       reModeTriang: TREEdit;
       reMaxTriang: TREEdit;
+
       grpBeta: TGroupBox;
       lblAlpha1Beta: TLabel;
       lblAlpha2Beta: TLabel;
@@ -95,21 +109,26 @@ interface
       reAlpha2Beta: TREEdit;
       reMinBeta: TREEdit;
       reMaxBeta: TREEdit;
+
       grpGamma: TGroupBox;
       lblAlphaGamma: TLabel;
       lblBetaGamma: TLabel;
       reAlphaGamma: TREEdit;
       reBetaGamma: TREEdit;
+
       grpExponential: TGroupBox;
       lblMeanExponential: TLabel;
       reMeanExponential: TREEdit;
+
       grpLogistic: TGroupBox;
       lblLocationLogistic: TLabel;
       lblScaleLogistic: TLabel;
       reLocationLogistic: TREEdit;
       reScaleLogistic: TREEdit;
+
       grpPiecewise: TGroupBox;
       btnEditPiecewise: TButton;
+
       grpLoglogistic: TGroupBox;
       lblLocationLoglogistic: TLabel;
       lblScaleLoglogistic: TLabel;
@@ -117,16 +136,61 @@ interface
       reLocationLoglogistic: TREEdit;
       reScaleLoglogistic: TREEdit;
       reShapeLoglogistic: TREEdit;
+
       grpUniform: TGroupBox;
       lblMinUniform: TLabel;
       lblMaxUniform: TLabel;
       reMinUniform: TREEdit;
       reMaxUniform: TREEdit;
+
       grpLognormal2: TGroupBox;
       lblZetaLognormal2: TLabel;
       lblSigmaLognormal2: TLabel;
       reZetaLognormal2: TREEdit;
       reSigmaLognormal2: TREEdit;
+
+      grpDiscreteUniform: TGroupBox;
+      lblDiscreteUniformMin: TLabel;
+      lblDiscreteUniformMax: TLabel;
+      reMinDiscreteUniform: TREEdit;
+      reMaxDiscreteUniform: TREEdit;
+
+      grpBernoulli: TGroupBox;
+      lblPBernoulli: TLabel;
+      rePBernoulli: TREEdit;
+
+      grpBinomial: TGroupBox;
+      lblBinomialN: TLabel;
+      lblBinomialP: TLabel;
+      reNBinomial: TREEdit;
+      rePBinomial: TREEdit;
+
+      grpHypergeometric: TGroupBox;
+      lblHypergeometricM: TLabel;
+      lblHypergeometricD: TLabel;
+      lblHypergeometricN: TLabel;
+      reMHypergeometric: TREEdit;
+      reDHypergeometric: TREEdit;
+      reNHypergeometric: TREEdit;
+
+      grpNegBinomial: TGroupBox;
+      lblSNegBinomial: TLabel;
+      lblPNegBinomial: TLabel;
+      reSNegBinomial: TREEdit;
+      rePNegBinomial: TREEdit;
+
+      grpPareto: TGroupBox;
+      lblThetaPareto: TLabel;
+      lblAPareto: TLabel;
+      reThetaPareto: TREEdit;
+      reAPareto: TREEdit;
+
+      grpInvGaussian: TGroupBox;
+      lblMeanInvGaussian: TLabel;
+      lblShapeInvGaussian: TLabel;
+      reMeanInvGaussian: TREEdit;
+      reShapeInvGaussian: TREEdit;
+
       pnlCbos: TPanel;
       lblPdfType: TLabel;
       cboPdfType: TComboBox;
@@ -139,15 +203,14 @@ interface
       pnlUnspecified: TPanel;
 
       fraAcceptCancel: TFrameAcceptCancel;
-      fraPointEditorGrid: TFramePointEditorGrid;   
+      fraPointEditorGrid: TFramePointEditorGrid;
 
       procedure cboPdfTypeChange(Sender: TObject);
 		
 			procedure reValueChanged( sender: TObject );
       procedure reExit( Sender: TObject);
       procedure reEnter(Sender: TObject);
-			procedure rleKeyDown( Sender: TObject; var Key: Word; Shift: TShiftState );
-			
+
       procedure fraAcceptCancelbtnAcceptClick(Sender: TObject);
       procedure fraAcceptCancelbtnCancelClick(Sender: TObject);
 
@@ -184,13 +247,26 @@ interface
       _shape: double;
       _zeta: double;
       _sigma: double;
+      _n: integer;
+      _p: double;
+      _d: integer;
+      _m: integer;
+      _dmin: integer;
+      _dmax: integer;
+      _s: integer;
+      _theta: double;
+      _a: double;
 
       _unitsLocked: boolean;
-      _nameVis: boolean;
-      _nameLocked: boolean;
 
       _tempRecord: RPdfRecord;
-      _tempPoints: RPointArray;
+      _tempPointsPiecewisePdf: RPointArray;
+      _tempPointsRelFunction: RPointArray;
+      _tempPointsHistogramPdf: RHistogramPointArray;
+
+      _isRelFunction: boolean;
+      _isPiecewisePdf: boolean;
+      _isHistogramPdf: boolean;
 
     	_myForm: TForm;
       _myEditor: TComponent;
@@ -207,10 +283,12 @@ interface
       _setParentMenuItemsEnabled: TObjFnVoid1Bool;
 
       _chartType: TChartType;
-      
+      _allowedPdfTypes: TPdfTypeSet;
+
       _isReadOnly: boolean;
 
       procedure translateUI();
+      procedure translateUIManual();
 
       procedure checkTempPoints();
 
@@ -220,6 +298,7 @@ interface
       procedure reChangeAccepted();
       procedure reChangeCanceled();
 
+      procedure setChildrenReadOnly( ctrl: TWinControl );
       procedure setReadOnly( val: boolean );
       function getReadOnly(): boolean;
 
@@ -242,7 +321,6 @@ interface
       procedure populateAxisCbo( cbx: TComboBox );
 			procedure setEditControlsEnabled( val: boolean );
       procedure setupForEdit();
-			function getName(): string;
 			
       // property getters & setters
       procedure setMin( val: double );
@@ -258,6 +336,15 @@ interface
       procedure setShape( val: double );
       procedure setZeta( val: double );
       procedure setSigma( val: double );
+      procedure setN( val: integer );
+      procedure setP( val: double );
+      procedure setD( val: integer );
+      procedure setM( val: integer );
+      procedure setDMin( val: integer );
+      procedure setDMax( val: integer );
+      procedure setS( val: integer );
+      procedure setTheta( val: double );
+      procedure setA( val: double );
 
       function getMin(): double;
       function getMode(): double;
@@ -272,16 +359,20 @@ interface
       function getShape(): double;
       function getZeta(): double;
       function getSigma(): double;
+      function getN(): integer;
+      function getP(): double;
+      function getD(): integer;
+      function getM(): integer;
+      function getDMin(): integer;
+      function getDMax(): integer;
+      function getS(): integer;
+      function getTheta(): double;
+      function getA(): double;
 
       function getXUnits(): TChartUnitType;
       procedure setXUnits( val: TChartUnitType );
       function getUnitsLocked(): boolean;
       procedure setUnitsLocked( val: boolean );
-
-      function getNameVis(): boolean;
-      procedure setNameVis( val: boolean );
-      function getNameLocked(): boolean;
-      procedure setNameLocked( val: boolean );
 
       function getEditEnabled(): boolean;
 
@@ -290,22 +381,24 @@ interface
       procedure setYUnits( val: TChartUnitType );
       function getYUnits(): TChartUnitType;
 
+      function getAllowedPdfTypes(): TPdfTypeSet;
+      procedure setAllowedPdfTypes( s: TPdfTypeSet );
+
+      procedure drawPDF( pdf: TPdf; const xUnits: TChartUnitType; enableEdit: boolean = false );
+      procedure drawRel( rel: TRelFunction; const xUnits, yUnits: TChartUnitType );
+
     public
       constructor create( AOwner: TComponent ); override;
       destructor destroy(); override;
 
 			procedure setForm( frm: TForm );
 
-      procedure clear();
-
       procedure setUpdateParams( fn: TUpdateParamsEvent );
       procedure setSetParentMenuItemsEnabled( fn: TObjFnVoid1Bool );
 
       procedure setPoints( pnt: RPointArray );
 
-      procedure copyChart( chart: TChartFunction; enableEdit: boolean = false );
-      procedure copyPDF( pdf: TPdf; enableEdit: boolean = false );
-      procedure copyRel( rel: TRelFunction );
+      procedure drawChart( chart: TChartFunction; const chartType: TChartType; const xUnits, yUnits: TChartUnitType; enableEdit: boolean = false );
 
 			function createPdf(): TPdf;
       function createRel(): TRelFunction;
@@ -323,28 +416,31 @@ interface
       property shape: double read getShape write setShape;
       property zeta: double read getZeta write setZeta;
       property sigma: double read getSigma write setSigma;
+      property n: integer read getN write setN;
+      property p: double read getP write setP;
+      property d: integer read getD write setD;
+      property m: integer read getM write setM;
+      property dMin: integer read getDMin write setDMin;
+      property dMax: integer read getDMax write setDMax;
+      property s: integer read getS write setS;
+      property theta: double read getTheta write setTheta;
+      property a: double read getA write setA;
 
       property isReadOnly: boolean read getReadOnly write setReadOnly;
 
       property chartType: TChartType read _chartType write setChartType;
 
       property unitsLocked: boolean read getUnitsLocked write setUnitsLocked;
-      property nameAlwaysVisible: boolean read getNameVis write setNameVis;
-      property nameLocked: boolean read getNameLocked write setNameLocked;
       property editEnabled: boolean read getEditEnabled write setEditControlsEnabled;
 
 			property xUnits: TChartUnitType read getXUnits write setXUnits;
       property yUnits: TChartUnitType read getYUnits write setYUnits;
       property minY: double read _minY write _minY;
       property maxY: double read _maxY write _maxY;
-    
+
+      property allowedPdfTypes: TPdfTypeSet read getAllowedPdfTypes write setAllowedPdfTypes;
     end
   ;
-
-  const
-    DBFRAMEFUNCTIONPARAMS2: boolean = false; // Set to true to enable debugging messages for this unit.
-  	DBFRAMEFUNCTIONPARAMS: boolean = false; // set to true to enable debugging messages for this unit.
-    PREVIEWENABLED: boolean = false; // FIX ME: eliminate once preview and convert functions are in place.
 
 implementation
 
@@ -352,18 +448,23 @@ implementation
 
 	uses
 		Math,
-		TypInfo,  
+		TypInfo,
+    Clipbrd,
 
+    RegExpr,
+
+    MyDelphiArrayUtils,
 		ARMath,
-		myDialogs,
+		MyDialogs,
     MyStrUtils,
-    GuiStrUtils,
     DebugWindow,
 		RegExpDefs,
 		ControlUtils,
     I88n
 	;
 
+  const
+    DBSHOWMSG: boolean = false; // Set to true to enable debugging messages for this unit.
 
   constructor TFrameFunctionParams2.create( AOwner: TComponent );
     begin
@@ -373,8 +474,7 @@ implementation
 			initialize( AOwner );
 			
       _setParentMenuItemsEnabled := nil;
-      
-      //_foo := false;
+
       _currentControl := nil;
     end
   ;
@@ -382,10 +482,10 @@ implementation
 
   procedure TFrameFunctionParams2.translateUI();
     begin
-      // This function was generated automatically by Caption Collector 0.6.0.
-      // Generation date: Mon Feb 25 15:50:37 2008
-      // File name: C:/Documents and Settings/apreeves/My Documents/NAADSM/Interface-Fremont/general_purpose_gui/function_editor/FrameFunctionParams2.dfm
-      // File date: Wed Apr 25 11:56:58 2007
+      // This function was generated automatically by Caption Collector 0.6.2.
+      // Generation date: Thu Apr 23 12:22:15 2009
+      // File name: C:/Documents and Settings/apreeves/My Documents/NAADSM/Interface-Gunnison/libaphi_delphi_gui/function_editor/FrameFunctionParams2.dfm
+      // File date: Wed Apr 22 10:45:08 2009
 
       // Set Caption, Hint, Text, and Filter properties
       with self do
@@ -426,18 +526,53 @@ implementation
           lblMinBeta.Caption := tr( 'Minimum:' );
           lblMaxBeta.Caption := tr( 'Maximum:' );
           btnConvert.Caption := tr( 'Convert to piecewise...' );
+          grpDiscreteUniform.Caption := tr( 'Parameters' );
+          lblDiscreteUniformMin.Caption := tr( 'Minimum:' );
+          lblDiscreteUniformMax.Caption := tr( 'Maximum:' );
+          grpBernoulli.Caption := tr( 'Parameters' );
+          lblPBernoulli.Caption := tr( 'p:' );
+          grpBinomial.Caption := tr( 'Parameters' );
+          lblBinomialN.Caption := tr( 'n:' );
+          lblBinomialP.Caption := tr( 'p:' );
+          grpHypergeometric.Caption := tr( 'Parameters' );
+          lblHypergeometricM.Caption := tr( 'M:' );
+          lblHypergeometricD.Caption := tr( 'D:' );
+          lblHypergeometricN.Caption := tr( 'n:' );
+          grpNegBinomial.Caption := tr( 'Parameters' );
+          lblSNegBinomial.Caption := tr( 's:' );
+          lblPNegBinomial.Caption := tr( 'p:' );
+          grpPareto.Caption := tr( 'Parameters' );
+          lblThetaPareto.Caption := tr( 'Theta:' );
+          lblAPareto.Caption := tr( 'a:' );
+          grpInvGaussian.Caption := tr( 'Parameters' );
+          lblMeanInvGaussian.Caption := tr( 'Mean:' );
+          lblShapeInvGaussian.Caption := tr( 'Shape:' );
+
           lblPdfType.Caption := tr( 'Function type:' );
           lblXAxis.Caption := tr( 'X axis units:' );
           lblYAxis.Caption := tr( 'Y axis units:' );
         end
       ;
 
+      // If any phrases are found that could not be automatically extracted by
+      // Caption Collector, modify the following function to take care of them.
+      translateUIManual();
+    end
+  ;
+
+
+  procedure TFrameFunctionParams2.translateUIManual();
+    begin
     end
   ;
 
 
   destructor TFrameFunctionParams2.destroy();
     begin
+      setLength( _tempPointsHistogramPdf, 0 );
+      setLength( _tempPointsPiecewisePdf, 0 );
+      setLength( _tempPointsRelFunction, 0 );
+
       // DO NOT delete the items stored in _paramSetsList: the list does not own the objects.
       // They will be freed when the form is closed.
     	freeAndNil( _paramSetsList );
@@ -445,15 +580,12 @@ implementation
     end
   ;
 
-  procedure TFrameFunctionParams2.initialize( AOwner: TComponent );
+  procedure TFrameFunctionParams2.initialize(  AOwner: TComponent );
     var
       i, j: integer;
       re: TREEdit;
       grp: TGroupBox;
   	begin
-      //-------------------------------------------
-      // Used to be inherited
-      //-------------------------------------------
       _myEditor := AOwner;
 
       pnlCbos.BevelInner := bvNone;
@@ -461,6 +593,7 @@ implementation
       pnlCbos.Left := -8;
       pnlCbos.Top := -8;
 
+      _allowedPdfTypes := [];
       populateCboPdfType();
       populateAxisCbo( cboXAxis );
 
@@ -477,18 +610,20 @@ implementation
 
 			showParamSet( '(Unspecified)', false );
 
-      setLength( _tempPoints, 0 );
+      setLength( _tempPointsPiecewisePdf, 0 );
+      setLength( _tempPointsRelFunction, 0 );
+      setLength( _tempPointsHistogramPdf, 0 );
 
-      setEditControlsEnabled( false );
+      //setEditControlsEnabled( false );
 
-      unitsLocked := false;
-      nameAlwaysVisible := false;
-      nameLocked := false;
+      //unitsLocked := false;
+
+      // FIX ME: Scan all parameters to determine if negative values are allowed.
 
       reAlpha1Beta.InputExpression := RE_DECIMAL_INPUT;
       reAlpha2Beta.InputExpression := RE_DECIMAL_INPUT;
-      reMinBeta.InputExpression := RE_DECIMAL_INPUT;
-      reMaxBeta.InputExpression := RE_DECIMAL_INPUT;
+      reMinBeta.InputExpression := RE_SIGNED_DECIMAL_INPUT;
+      reMaxBeta.InputExpression := RE_SIGNED_DECIMAL_INPUT;
 
       reAlphaGamma.InputExpression := RE_DECIMAL_INPUT;
       reBetaGamma.InputExpression := RE_DECIMAL_INPUT;
@@ -500,29 +635,48 @@ implementation
       reScaleLoglogistic.InputExpression := RE_DECIMAL_INPUT;
       reShapeLoglogistic.InputExpression := RE_DECIMAL_INPUT;
 
-      reMaxTriang.InputExpression := RE_DECIMAL_INPUT;
-      reMinTriang.InputExpression := RE_DECIMAL_INPUT;
-      reModeTriang.InputExpression := RE_DECIMAL_INPUT;
+      reMaxTriang.InputExpression := RE_SIGNED_DECIMAL_INPUT;
+      reMinTriang.InputExpression := RE_SIGNED_DECIMAL_INPUT;
+      reModeTriang.InputExpression := RE_SIGNED_DECIMAL_INPUT;
 
-      reMaxUniform.InputExpression := RE_DECIMAL_INPUT;
-      reMinUniform.InputExpression := RE_DECIMAL_INPUT;
+      reMaxUniform.InputExpression := RE_SIGNED_DECIMAL_INPUT;
+      reMinUniform.InputExpression := RE_SIGNED_DECIMAL_INPUT;
 
       reMeanExponential.InputExpression := RE_DECIMAL_INPUT;
 
       reMeanGaussian.InputExpression := RE_DECIMAL_INPUT;
       reStdDevGaussian.InputExpression := RE_DECIMAL_INPUT;
 
-      reValuePoint.InputExpression := RE_DECIMAL_INPUT;
+      reValuePoint.InputExpression := RE_SIGNED_DECIMAL_INPUT;
 
       reSigmaLognormal2.InputExpression := RE_DECIMAL_INPUT;
       reZetaLognormal2.InputExpression := RE_SIGNED_DECIMAL_INPUT;
 
+      reMinDiscreteUniform.InputExpression := RE_SIGNED_INTEGER_INPUT;
+      reMaxDiscreteUniform.InputExpression := RE_SIGNED_INTEGER_INPUT;
+
+      rePBernoulli.InputExpression := RE_DECIMAL_INPUT;
+
+      reNBinomial.InputExpression := RE_INTEGER_INPUT;
+      rePBinomial.InputExpression := RE_DECIMAL_INPUT;
+
+      reMHypergeometric.InputExpression := RE_INTEGER_INPUT;
+      reDHypergeometric.InputExpression := RE_INTEGER_INPUT;
+      reNHypergeometric.InputExpression := RE_INTEGER_INPUT;
+
+      reSNegBinomial.InputExpression := RE_INTEGER_INPUT;
+      rePNegBinomial.InputExpression := RE_DECIMAL_INPUT;
+
+      reThetaPareto.InputExpression := RE_DECIMAL_INPUT;
+      reAPareto.InputExpression := RE_DECIMAL_INPUT;
+
+      reMeanInvGaussian.InputExpression := RE_DECIMAL_INPUT;
+      reShapeInvGaussian.InputExpression := RE_DECIMAL_INPUT;
+
       resetStoredValues();
 
-      setupForEdit();      
+      setupForEdit();
       //-------------------------------------------
-      
-      _paramSetsList['Relational'] := grpPiecewise;
 
       self.Width := 153;
       pnlParams.Width := self.Width;
@@ -536,11 +690,10 @@ implementation
 
       setEditControlsEnabled( true );
 
-      unitsLocked := true;
+      //unitsLocked := true;
 
       populateAxisCbo( cboYAxis );
 
-      // FIX ME: a recursive search might be better.
       for i := 0 to pnlParams.ControlCount - 1 do
         begin
           if( pnlParams.Controls[i] is TGroupBox ) then
@@ -551,9 +704,9 @@ implementation
                   if( grp.Controls[j] is TREEdit ) then
                     begin
                       re := grp.Controls[j] as TREEdit;
+
                       re.OnEnter := reEnter;
                       re.OnExit := reExit;
-
                       re.OnKeyUp := reKeyUp;
 
                       re.Width := 113;
@@ -573,6 +726,21 @@ implementation
   ;
 
 
+  function TFrameFunctionParams2.getAllowedPdfTypes(): TPdfTypeSet;
+    begin
+      result := _allowedPdfTypes;
+    end
+  ;
+
+
+  procedure TFrameFunctionParams2.setAllowedPdfTypes( s: TPdfTypeSet );
+    begin
+      _allowedPdfTypes := s;
+      populateCboPdfType();
+    end
+  ;
+
+
   procedure TFrameFunctionParams2.setForm( frm: TForm );
   	begin
     	_myForm := frm;
@@ -582,66 +750,188 @@ implementation
 
   procedure TFrameFunctionParams2.populateCboPdfType();
   	begin
+      // Clear out the old settings...
+      //------------------------------
       cboPdfType.Clear();
 
+      if( nil <> _paramSetsList ) then
+        freeAndNil( _paramSetsList )
+      ;
+
+      // ...and start again.
+      //--------------------
       _paramSetsList := TQStringObjectMap.create();
+      _paramSetsList[ tr( 'Relational' ) ] := grpPiecewise;
 
       cboPdfType.Items.Append( tr( '(Unspecified)' ) );
       _paramSetsList[ tr( '(Unspecified)' ) ] := grpUnspecified;
 
-      cboPdfType.Items.Append( tr( 'Fixed value' ) );
-      _paramSetsList[tr( 'Fixed value' ) ] := grpPoint;
+      if( PdfBeta in _allowedPdfTypes ) then
+        begin
+          cboPdfType.Items.Append( tr( 'Beta' ) );
+          _paramSetsList[ tr( 'Beta' ) ] := grpBeta;
+        end
+      ;
 
-      cboPdfType.Items.Append( tr( 'Uniform' ) );
-      _paramSetsList[tr( 'Uniform' ) ] := grpUniform;
+      if( PdfBetaPERT in _allowedPdfTypes ) then
+        begin
+          cboPdfType.Items.Append( tr( 'BetaPERT' ) );
+          _paramSetsList[ tr( 'BetaPERT' ) ] := grpTriang;
+        end
+      ;
 
-      cboPdfType.Items.Append( tr( 'Triangular' ) );
-      _paramSetsList[tr( 'Triangular' ) ] := grpTriang;
+      if( PdfBernoulli in _allowedPdfTypes ) then
+        begin
+          cboPdfType.Items.Append( tr( 'Bernoulli' ) );
+          _paramSetsList[ tr( 'Bernoulli' ) ] := grpBernoulli;
+        end
+      ;
 
-      cboPdfType.Items.Append( tr( 'Piecewise (general)' ) );
-      _paramSetsList[tr( 'Piecewise (general)' ) ] := grpPiecewise;
+      if( PdfBinomial in _allowedPdfTypes ) then
+        begin
+          cboPdfType.Items.Append( tr( 'Binomial' ) );
+          _paramSetsList[ tr( 'Binomial' ) ] := grpBinomial;
+        end
+      ;
 
-      cboPdfType.Items.Append( tr( 'Gaussian (normal)' ) );
-      _paramSetsList[tr( 'Gaussian (normal)' ) ] := grpGaussian;
+      if( PdfDiscreteUniform in _allowedPdfTypes ) then
+        begin
+          cboPdfType.Items.Append( tr( 'Discrete uniform' ) );
+          _paramSetsList[ tr( 'Discrete uniform' ) ] := grpDiscreteUniform;
+        end
+      ;
 
-      cboPdfType.Items.Append( tr( 'Lognormal' ) );
-      _paramSetsList[tr( 'Lognormal' ) ] := grpGaussian;
+      if( PdfExponential in _allowedPdfTypes ) then
+        begin
+          cboPdfType.Items.Append( tr( 'Exponential' ) );
+          _paramSetsList[ tr( 'Exponential' )] := grpExponential;
+        end
+      ;
 
-      cboPdfType.Items.Append( tr( 'Lognormal (2nd form)' ) );
-      _paramSetsList[tr( 'Lognormal (2nd form)') ] := grpLognormal2;
+      // Filed under "F" in the GUI
+      if( PdfPoint in _allowedPdfTypes ) then
+        begin
+          cboPdfType.Items.Append( tr( 'Fixed value' ) );
+          _paramSetsList[ tr( 'Fixed value' ) ] := grpPoint;
+        end
+      ;
 
-      cboPdfType.Items.Append( tr( 'Gamma' ) );
-      _paramSetsList[tr( 'Gamma') ] := grpGamma;
+      if( PdfGamma in _allowedPdfTypes ) then
+        begin
+          cboPdfType.Items.Append( tr( 'Gamma' ) );
+          _paramSetsList[ tr( 'Gamma') ] := grpGamma;
+        end
+      ;
 
-      cboPdfType.Items.Append( tr( 'Weibull' ) );
-      _paramSetsList[tr( 'Weibull' ) ] := grpGamma;
+      if( PdfGaussian in _allowedPdfTypes ) then
+        begin
+          cboPdfType.Items.Append( tr( 'Gaussian (normal)' ) );
+          _paramSetsList[ tr( 'Gaussian (normal)' ) ] := grpGaussian;
+        end
+      ;
 
-      cboPdfType.Items.Append( tr( 'Pearson 5' ) );
-      _paramSetsList[tr( 'Pearson 5' ) ] := grpGamma;
+      if( PdfHistogram in _allowedPdfTypes ) then
+        begin
+          cboPdfType.Items.Append( tr( 'Histogram' ) );
+          _paramSetsList[ tr( 'Histogram' ) ] := grpPiecewise;
+        end
+      ;
 
-      cboPdfType.Items.Append( tr( 'Beta' ) );
-      _paramSetsList[tr( 'Beta' ) ] := grpBeta;
+      if( PdfHypergeometric in _allowedPdfTypes ) then
+        begin
+          cboPdfType.Items.Append( tr( 'Hypergeometric' ) );
+          _paramSetsList[ tr( 'Hypergeometric' ) ] := grpHypergeometric;
+        end
+      ;
 
-      cboPdfType.Items.Append( tr( 'BetaPERT' ) );
-      _paramSetsList[tr( 'BetaPERT' ) ] := grpTriang;
+      if( PdfInverseGaussian in _allowedPdfTypes ) then
+        begin
+          cboPdfType.Items.Append( tr( 'Inverse Gaussian' ) );
+          _paramSetsList[ tr( 'Inverse Gaussian' ) ] := grpInvGaussian;
+        end
+      ;
 
-      cboPdfType.Items.Append( tr( 'Logistic' ) );
-      _paramSetsList[tr( 'Logistic' ) ] := grpLogistic;
+      if( PdfLogistic in _allowedPdfTypes ) then
+        begin
+          cboPdfType.Items.Append( tr( 'Logistic' ) );
+          _paramSetsList[ tr( 'Logistic' ) ] := grpLogistic;
+        end
+      ;
 
-      cboPdfType.Items.Append( tr( 'Loglogistic' ) );
-      _paramSetsList[tr( 'Loglogistic') ] := grpLogLogistic;
+      if( PdfLogLogistic in _allowedPdfTypes ) then
+        begin
+          cboPdfType.Items.Append( tr( 'Loglogistic' ) );
+          _paramSetsList[ tr( 'Loglogistic') ] := grpLogLogistic;
+        end
+      ;
 
-      cboPdfType.Items.Append( tr( 'Exponential' ) );
-      _paramSetsList[tr( 'Exponential' )] := grpExponential;
+      if( PdfLognormal in _allowedPdfTypes ) then
+        begin
+          cboPdfType.Items.Append( tr( 'Lognormal' ) );
+          _paramSetsList[ tr( 'Lognormal' ) ] := grpGaussian;
+
+          cboPdfType.Items.Append( tr( 'Lognormal (2nd form)' ) );
+          _paramSetsList[ tr( 'Lognormal (2nd form)') ] := grpLognormal2;
+        end
+      ;
+
+      if( PdfNegativeBinomial in _allowedPdfTypes ) then
+        begin
+          cboPdfType.Items.Append( tr( 'Negative binomial' ) );
+          _paramSetsList[ tr( 'Negative binomial' ) ] := grpNegBinomial;
+        end
+      ;
+
+      if( PdfPareto in _allowedPdfTypes ) then
+        begin
+          cboPdfType.Items.Append( tr( 'Pareto' ) );
+          _paramSetsList[ tr( 'Pareto' ) ] := grpPareto;
+        end
+      ;
+
+      if( PdfPearson5 in _allowedPdfTypes ) then
+        begin
+          cboPdfType.Items.Append( tr( 'Pearson 5' ) );
+          _paramSetsList[ tr( 'Pearson 5' ) ] := grpGamma;
+        end
+      ;
+
+      if( PdfPiecewise in _allowedPdfTypes ) then
+        begin
+          cboPdfType.Items.Append( tr( 'Piecewise (general)' ) );
+          _paramSetsList[ tr( 'Piecewise (general)' ) ] := grpPiecewise;
+        end
+      ;
+
+      if( PdfPoisson in _allowedPdfTypes ) then
+        begin
+          cboPdfType.Items.Append( tr( 'Poisson' ) );
+          _paramSetsList[ tr( 'Poisson' ) ] := grpExponential;
+        end
+      ;
+
+      if( PdfTriangular in _allowedPdfTypes ) then
+        begin
+          cboPdfType.Items.Append( tr( 'Triangular' ) );
+          _paramSetsList[ tr( 'Triangular' ) ] := grpTriang;
+        end
+      ;
+
+      if( PdfUniform in _allowedPdfTypes ) then
+        begin
+          cboPdfType.Items.Append( tr( 'Uniform' ) );
+          _paramSetsList[ tr( 'Uniform' ) ] := grpUniform;
+        end
+      ;
+
+      if( PdfWeibull in _allowedPdfTypes ) then
+        begin
+          cboPdfType.Items.Append( tr( 'Weibull' ) );
+          _paramSetsList[ tr( 'Weibull' ) ] := grpGamma;
+        end
+      ;
 
       cboPdfType.ItemIndex := 0;
-
-      // List the boxes // This apparently does nothing??
-      (*
-    	for i := 0 to _paramSetsList.Count-1 do
-      	obj := _paramSetsList.itemAtIndex(i) as TGroupBox
-      ;
-      *)
     end
   ;
 
@@ -649,16 +939,26 @@ implementation
   procedure TFrameFunctionParams2.populateAxisCbo( cbx: TComboBox );
   	var
     	i: TChartUnitType;
+      list: TStringList;
+      j: integer;
  		begin
+      list := TStringList.Create();
+      for i := low( TChartUnitType ) to high( TChartUnitType ) do
+      	if i > low( TChartUnitType ) then list.append( chartUnitTypeAsString(i) )
+      ;
+      list.Sort();
+
     	cbx.Clear();
 
       // REMEMBER: units type indices in the combo box are offset by one,
       // relative to TUnits!
-      for i := low( TChartUnitType ) to high( TChartUnitType ) do
-      	if i > low( TChartUnitType ) then cbx.Items.append( chartUnitTypeAsString(i) )
+      for j := 0 to list.count - 1 do
+      	cbx.Items.Add( list[j] )
       ;
 
-      cbx.Enabled := false; // !!!!
+      list.Free();
+      
+      cbx.Enabled := false;
     end
   ;
 
@@ -678,6 +978,15 @@ implementation
 			self.location := _tempRecord.location;
 			self.scale := _tempRecord.scale;
 			self.shape := _tempRecord.shape;
+      self.n := _tempRecord.n;
+      self.p := _tempRecord.p;
+      self.m := _tempRecord.m;
+      self.d := _tempRecord.d;
+      self.dMin := _tempRecord.dMin;
+      self.dMax := _tempRecord.dMax;
+      self.s := _tempRecord.s;
+      self.theta := _tempRecord.theta;
+      self.a := _tempRecord.a;
     end
   ;
 
@@ -697,63 +1006,64 @@ implementation
       _shape := NaN;
       _zeta := NaN;
       _sigma := NaN;
+      _n := -1;
+      _p := NaN;
+      _m := -1;
+      _d := -1;
+      _dMin := 0;
+      _dMax := 0;
+      _s := -1;
+      _theta := NaN;
+      _a := NaN;
 
-      setLength( _tempPoints, 0 );
+      setLength( _tempPointsPiecewisePdf, 0 );
+      setLength( _tempPointsRelFunction, 0 );
+      setLength( _tempPointsHistogramPdf, 0 );
     end
   ;
 
 
-  procedure TFrameFunctionParams2.copyChart( chart: TChartFunction; enableEdit: boolean = false );
+  procedure TFrameFunctionParams2.drawChart( chart: TChartFunction; const chartType: TChartType; const xUnits, yUnits: TChartUnitType; enableEdit: boolean = false );
     begin
-      case chart.chartType of
-        CTPdf: copyPdf( chart as TPdf, enableEdit );
-        CTRel: copyRel( chart as TRelFunction );
+      case chartType of
+        CTPdf: drawPdf( chart as TPdf, xUnits, enableEdit );
+        CTRel: drawRel( chart as TRelFunction, xUnits, yUnits );
         else raise exception.Create( 'Unrecognized chart type in TFrameFunctionParams2.copyChart' );
       end;
     end
   ;
 
-  procedure TFrameFunctionParams2.copyRel( rel: TRelFunction );
+
+  procedure TFrameFunctionParams2.drawRel( rel: TRelFunction; const xUnits, yUnits: TChartUnitType );
     begin
       _chartType := CTRel;
 
-      if( 0 = length( rel.pointArray ) ) then
+      if( ( nil = rel ) or ( 0 = rel.pointCount ) ) then
         begin
           // Create some fake points
-          setLength( _tempPoints, 3 );
+          setLength( _tempPointsRelFunction, 3 );
 
-          _tempPoints[0].x := 0.0;
-          _tempPoints[0].y := 100.0;
+          _tempPointsRelFunction[0].x := 0.0;
+          _tempPointsRelFunction[0].y := 100.0;
 
-          _tempPoints[1].x := 3.5;
-          _tempPoints[1].y := 50.0;
+          _tempPointsRelFunction[1].x := 3.5;
+          _tempPointsRelFunction[1].y := 50.0;
 
-          _tempPoints[2].x := 7.0;
-          _tempPoints[2].y := 25.0;
+          _tempPointsRelFunction[2].x := 7.0;
+          _tempPointsRelFunction[2].y := 25.0;
         end
-      else if( 1 = length( rel.pointArray ) ) then
+      else if( 1 = rel.pointCount ) then
         begin
-          setLength( _tempPoints, 2 );
+          setLength( _tempPointsRelFunction, 2 );
 
-          _tempPoints[1].x := _tempPoints[0].x + 1;
-          _tempPoints[1].y := _tempPoints[0].y;
+          _tempPointsRelFunction[1].x := _tempPointsRelFunction[0].x + 1;
+          _tempPointsRelFunction[1].y := _tempPointsRelFunction[0].y;
         end
       else
-        _tempPoints := rel.pointArray
+        _tempPointsRelFunction := rel.createRecordPointArray()
       ;
 
-      showParamSet( 'Relational', false );
-    end
-  ;
-  
-
-  procedure TFrameFunctionParams2.clear();
-  	begin
-   		showParamSet( '(Unspecified)', false );
-      cboPdfType.ItemIndex := -1;
-      resetStoredValues();
-
-      setEditControlsEnabled( false );// FIX ME: think about this.
+      showParamSet( tr( 'Relational' ), false );
     end
   ;
 
@@ -771,13 +1081,13 @@ implementation
         end
       ;
 
-      if( ( 'Relational' = boxName ) or ( _paramSetsList.contains( tr( boxName ) ) ) ) then
+      _isRelFunction := ( tr( 'Relational' ) = boxName );
+      _isPiecewisePdf := ( tr( 'Piecewise (general)' ) = boxName );
+      _isHistogramPdf := ( tr( 'Histogram' ) = boxName );
+
+      if( _isRelFunction or ( _paramSetsList.contains( tr( boxName ) ) ) ) then
         begin
-          if
-            ( tr( 'Piecewise (general)' ) <> boxName )
-          and
-            ( 'Relational' <> boxName )
-          then
+          if( ( not( _isPiecewisePdf ) ) and ( not( _isHistogramPdf ) ) and ( not( _isRelFunction ) ) ) then
             begin
               fraPointEditorGrid.visible := false;
 
@@ -787,7 +1097,6 @@ implementation
               horizCenterInside( obj, self );
               obj.Top := 0;
               obj.Visible := true;
-
 
               // Enable/disable child controls
               for j := 0 to obj.controlCount-1 do
@@ -804,8 +1113,7 @@ implementation
               fraPointEditorGrid.visible := true;
 
               checkTempPoints();
-              fraPointEditorGrid.setPoints( _tempPoints );
-              
+
               updateFormFunctionParams();
             end
           ;
@@ -820,112 +1128,164 @@ implementation
 	procedure TFrameFunctionParams2.reValueChanged( sender: TObject );
   	var
     	re: TREEdit;
+      vali: integer;
       val: double;
       success: boolean;
   	begin
+      dbcout( '*** base reValueChanged', DBSHOWMSG );
+
    		re := sender as TREEdit;
-      val := -1;
 
-      dbcout( '*** base reValueChanged', DBFRAMEFUNCTIONPARAMS );
+      if( re.ReadOnly ) then
+        exit
+      ;
 
-      success := tryStrToFloat( re.Text, val );
+      if( ( RE_INTEGER_INPUT = re.InputExpression ) or ( RE_SIGNED_INTEGER_INPUT = re.InputExpression ) ) then
+        begin
+          vali := -1;
+
+          success := tryStrToInt( re.Text, vali );
+
+          if( reMinDiscreteUniform = re ) then dMin := vali;
+          if( reMaxDiscreteUniform = re ) then dMax := vali;
+
+          if
+            ( reNBinomial = re )
+          or
+            ( reNHypergeometric = re )
+          then
+            n := vali
+          ;
+
+          if( reSNegBinomial = re ) then s := vali;
+          if( reMHypergeometric = re ) then m := vali;
+          if( reDHypergeometric = re ) then d := vali;
+        end
+      else
+        begin
+          val := -1.0;
+
+          success := tryStrToFloat( re.Text, val );
       
-      dbcout( 'Value of ' + re.Name + ' just changed to  ' + uiFloatToStr( val ), DBFRAMEFUNCTIONPARAMS );
+          dbcout( 'Value of ' + re.Name + ' just changed to  ' + dbFloatToStr( val ), DBSHOWMSG );
 
-      if
-        ( reMinTriang = re )
-      or
-        ( reMinUniform = re )
-      or
-        ( reMinBeta = re )
-      then
-        min := val
-      ;
+          if
+            ( rePBinomial = re )
+          or
+            ( rePNegBinomial = re )
+          or
+            ( rePBernoulli = re )
+          then
+            p := val
+          ;
 
-      if
-        ( reModeTriang = re )
-      or
-        ( reValuePoint = re )
-      then
-        mode := val
-      ;
+          if
+            ( reMinTriang = re )
+          or
+            ( reMinUniform = re )
+          or
+            ( reMinBeta = re )
+          then
+            min := val
+          ;
 
-      if
-        ( reMaxTriang = re )
-      or
-        ( reMaxUniform = re )
-      or
-        ( reMaxBeta = re )
-      then
-        max := val
-      ;
+          if
+            ( reModeTriang = re )
+          or
+            ( reValuePoint = re )
+          then
+            mode := val
+          ;
 
-      if
-        ( reAlphaGamma = re )
-      or
-        ( reAlpha1Beta = re)
-      then
-        alpha := val
-      ;
+          if
+            ( reMaxTriang = re )
+          or
+            ( reMaxUniform = re )
+          or
+            ( reMaxBeta = re )
+          then
+            max := val
+          ;
 
-      if( reAlpha2Beta = re ) then alpha2 := val;
+          if
+            ( reAlphaGamma = re )
+          or
+            ( reAlpha1Beta = re)
+          then
+            alpha := val
+          ;
 
-      if ( reBetaGamma = re ) then beta := val;
+          if( reAlpha2Beta = re ) then alpha2 := val;
 
-      if
-        ( reMeanGaussian = re )
-      or
-        ( reMeanExponential = re )
-      then
-        begin
-          mean := val;
-          zeta := TPdfLognormal.calculateZeta( mean, stddev );
+          if ( reBetaGamma = re ) then beta := val;
+
+          if
+            ( reMeanGaussian = re )
+          or
+            ( reMeanExponential = re )
+          or
+            ( reMeanInvGaussian = re )
+          then
+            begin
+              mean := val;
+              zeta := TPdfLognormal.calculateZeta( mean, stddev );
+            end
+          ;
+
+          if( reStdDevGaussian = re ) then
+            begin
+              stddev := val;
+              sigma := TPdfLognormal.calculateSigmaPrime( mean, stddev );
+              zeta := TPdfLognormal.calculateZeta( mean, stddev );
+            end
+          ;
+
+
+          if( reZetaLognormal2 = re ) then
+            begin
+              zeta := val;
+              mean := TPdfLognormal.calculateMean( zeta, sigma );
+              stddev := TPdfLognormal.calculateStddev( zeta, sigma );
+            end
+          ;
+
+          if( reSigmaLognormal2 = re ) then
+            begin
+              sigma := val;
+              stddev := TPdfLognormal.calculateStddev( zeta, sigma );
+              mean := TPdfLognormal.calculateMean( zeta, sigma );
+            end
+          ;
+
+
+          if
+            ( reLocationLogistic = re)
+          or
+            ( reLocationLoglogistic = re )
+          then
+            location := val
+          ;
+
+          if
+            ( reScaleLogistic = re )
+          or
+            ( reScaleLoglogistic = re )
+          then
+            scale := val
+          ;
+
+          if
+            ( reShapeLoglogistic = re )
+          or
+            ( reShapeInvGaussian = re )
+          then
+            shape := val
+          ;
+
+          if( reThetaPareto = re ) then theta := val;
+          if( reAPareto = re ) then a := val;
         end
       ;
-
-      if( reStdDevGaussian = re ) then
-        begin
-          stddev := val;
-          sigma := TPdfLognormal.calculateSigmaPrime( mean, stddev );
-          zeta := TPdfLognormal.calculateZeta( mean, stddev );
-        end
-      ;
-
-
-      if( reZetaLognormal2 = re ) then
-        begin
-          zeta := val;
-          mean := TPdfLognormal.calculateMean( zeta, sigma );
-          stddev := TPdfLognormal.calculateStddev( zeta, sigma );
-        end
-      ;
-
-      if( reSigmaLognormal2 = re ) then
-        begin
-          sigma := val;
-          stddev := TPdfLognormal.calculateStddev( zeta, sigma );
-          mean := TPdfLognormal.calculateMean( zeta, sigma );
-        end
-      ;
-
-
-      if
-        ( reLocationLogistic = re)
-      or
-        ( reLocationLoglogistic = re )
-      then
-        location := val
-      ;
-
-      if
-        ( reScaleLogistic = re )
-      or
-        ( reScaleLoglogistic = re )
-      then
-        scale := val
-      ;
-
-      if( reShapeLoglogistic = re ) then shape := val;
 
       if( not success ) then
       	re.text := ''
@@ -949,10 +1309,18 @@ implementation
           shape := self.shape;    
           mean := self.mean;
           stddev := self.stddev;
+          n := self.n;
+          p := self.p;
+          m := self.m;
+          d := self.d;
+          dMin := self.dMin;
+          dMax := self.dMax;
+          s := self.s;
+          theta := self.theta;
+          a := self.a;
 
           pdfType := pdfTypeFromCboPdfTypeItem();
-          pdfUnits := TChartUnitType( self.cboXAxis.ItemIndex + 1 );
-          name := getName();
+          pdfUnits := chartUnitTypeFromString( self.cboXAxis.Items[ self.cboXAxis.itemIndex ] );
         end
       ;
     end
@@ -960,375 +1328,455 @@ implementation
 
 
 
-// Forces a refresh of all stored values from active/visible RegExp line editors.
-procedure TFrameFunctionParams2.forceValueRefresh();
-	var
-    i, j: integer;
-    obj: TGroupbox;
-	begin
-    // For every control on the form...
-    for i := 0 to pnlParams.ControlCount-1 do
-      begin
+  // Forces a refresh of all stored values from active/visible RegExp line editors.
+  procedure TFrameFunctionParams2.forceValueRefresh();
+    var
+      i, j: integer;
+      obj: TGroupbox;
+    begin
+      // For every control on the form...
+      for i := 0 to pnlParams.ControlCount-1 do
+        begin
 
-      	// ...is the control the visible, active group box?
-        if( pnlParams.Controls[i] is TGroupBox ) and ( pnlParams.Controls[i].visible ) then
+          // ...is the control the visible, active group box?
+          if( pnlParams.Controls[i] is TGroupBox ) and ( pnlParams.Controls[i].visible ) then
+            begin
+
+              // If yes, check every control in that group box...
+              obj := pnlParams.Controls[i] as TGroupbox;
+              for j := 0 to obj.controlCount-1 do
+                begin
+                  // ...and store values from each of the controls that's an editor box.
+                  if( obj.controls[j] is TREEdit ) then reValueChanged( obj.Controls[j] );
+                end
+              ;
+            end
+        end
+      ;
+    end
+  ;
+
+
+
+  procedure TFrameFunctionParams2.cboPdfTypeChange(Sender: TObject);
+    var
+      key: string;
+    begin
+      key := cboPdfType.Items[cboPdfType.ItemIndex];
+
+      showParamSet( key, editEnabled );
+
+      if( isNumber( _min ) ) then
+        begin
+          reMinTriang.Text := uiFloatToStr( _min );
+          reMinUniform.Text := uiFloatToStr( _min );
+          reMinBeta.Text := uiFloatToStr( _min );
+        end
+      else
+        begin
+          reMinTriang.Text := '';
+          reMinUniform.Text := '';
+          reMinBeta.Text := '';
+        end
+      ;
+
+      if( isNumber( _mode ) ) then
+        begin
+          reModeTriang.Text := uiFloatToStr( _mode );
+          reValuePoint.Text := uiFloatToStr( _mode );
+        end
+      else
+        begin
+          reModeTriang.Text := '';
+          reValuePoint.text := '';
+        end
+      ;
+
+      if( isNumber( _max ) ) then
+        begin
+          reMaxTriang.Text := uiFloatToStr( _max );
+          reMaxUniform.Text := uiFloatToStr( _max );
+          reMaxBeta.Text := uiFloatToStr( _max );
+        end
+      else
+        begin
+          reMaxTriang.Text := '';
+          reMaxUniform.Text := '';
+          reMaxBeta.Text := '';
+        end
+      ;
+
+      if( isNumber( _mean ) ) then
+        begin
+          reMeanGaussian.Text := uiFloatToStr( _mean );
+          reMeanExponential.Text := uiFloatToStr( _mean );
+          reMeanInvGaussian.Text := uiFloatToStr( _mean );
+        end
+      else
+        begin
+          reMeanGaussian.Text := '';
+          reMeanExponential.Text := '';
+          reMeanInvGaussian.Text := '';
+        end
+      ;
+
+      if( isNumber( _stddev ) ) then
+        reStddevGaussian.Text := uiFloatToStr( _stddev ) else reStddevGaussian.Text := ''
+      ;
+
+      if( isNumber( _alpha ) ) then
+        begin
+          reAlpha1Beta.Text := uiFloatToStr( _alpha );
+          reAlphaGamma.Text := uiFloatToStr( _alpha );
+        end
+      else
+        begin
+          reAlpha1Beta.Text := '';
+          reAlphaGamma.Text := '';
+        end
+      ;
+
+      if( isNumber( _alpha2 ) ) then
+        reAlpha2Beta.Text := uiFloatToStr( _alpha2 )
+      else
+        reAlpha2Beta.Text := '';
+      ;
+
+      if( isNumber( _beta ) ) then
+        reBetaGamma.Text := uiFloatToStr( _beta )
+      else
+        reBetaGamma.Text := ''
+      ;
+
+
+      if( isNumber( _location ) ) then
+        begin
+          reLocationLogLogistic.Text := uiFloatToStr( _location );
+          reLocationLogistic.Text := uiFloatToStr( _location );
+        end
+      else
+        begin
+          reLocationLogLogistic.Text := '';
+          reLocationLogistic.Text := '';
+        end
+      ;
+
+      if( isNumber( _scale ) ) then
+        begin
+          reScaleLogistic.Text := uiFloatToStr( _scale );
+          reScaleLoglogistic.Text := uiFloatToStr( _scale );
+        end
+      else
+        begin
+          reScaleLogistic.Text := '';
+          reScaleLoglogistic.Text := '';
+        end
+      ;
+
+      if( isNumber( _shape ) ) then
+        begin
+          reShapeLoglogistic.Text := uiFloatToStr( _shape );
+          reShapeInvGaussian.Text := uiFloatToStr( _shape );
+        end
+      else
+        begin
+          reShapeLoglogistic.Text := '';
+          reShapeInvGaussian.Text := '';
+        end
+      ;
+
+      if( isNumber( _zeta ) ) then
+        reZetaLognormal2.Text := uiFloatToStr( _zeta )
+      else
+        reZetaLognormal2.Text := ''
+      ;
+
+      if( isNumber( _sigma ) ) then
+        reSigmaLognormal2.Text := uiFloatToStr( _sigma )
+      else
+        reSigmaLognormal2.Text := ''
+      ;
+
+      if( isProportion( _p ) ) then
+        begin
+          rePBernoulli.Text := uiFloatToStr( _p );
+          rePBinomial.Text := uiFloatToStr( _p );
+          rePNegBinomial.Text := uiFloatToStr( _p );
+        end
+      else
+        begin
+          rePBernoulli.Text := '';
+          rePBinomial.Text := '';
+          rePNegBinomial.Text := '';
+        end
+      ;
+
+      if( 0 <= _n ) then
+        begin
+          reNBinomial.Text := intToStr( _n );
+          reNHypergeometric.Text := intToStr( _n );
+        end
+      else
+        begin
+          reNBinomial.Text := '';
+          reNHypergeometric.Text := '';
+        end
+      ;
+
+      if( 0 <= _d ) then
+        reDHypergeometric.Text := intToStr( _d )
+      else
+        reDHypergeometric.Text := ''
+      ;
+
+      if( 0 <= _m ) then
+        reMHypergeometric.Text := intToStr( _m )
+      else
+        reMHypergeometric.Text := ''
+      ;
+
+      if( isNumber( _theta ) ) then
+        reThetaPareto.text := uiFloatToStr( _theta )
+      else
+        reThetaPareto.Text := ''
+      ;
+
+      if( isNumber( _a ) ) then
+        reAPareto.Text := uiFloatToStr( _a )
+      else
+        reAPareto.Text := ''
+      ;
+
+      reMinDiscreteUniform.Text := intToStr( _dMin );
+      reMaxDiscreteUniform.Text := intToStr( _dMax );
+
+      updateFormFunctionParams();
+
+      if( nil <> @_setParentMenuItemsEnabled ) then
+        _setParentMenuItemsEnabled( true )
+      ;
+    end
+  ;
+
+
+
+  procedure TFrameFunctionParams2.showFraAcceptCancel( winControl: TWinControl );
+    begin
+      fraAcceptCancel.Parent := winControl.Parent;
+
+      winControl.Width := 65;
+      fraAcceptCancel.Top := winControl.Top;
+      fraAcceptCancel.Left := winControl.Left + winControl.Width + 1;
+
+      fraAcceptCancel.Visible := true;
+
+      cboPdfType.Enabled := false;
+      cboXAxis.Enabled := false;
+      cboYAxis.Enabled := false;
+      btnConvert.Enabled := false;
+    end
+  ;
+
+
+  procedure TFrameFunctionParams2.hideFraAcceptCancel();
+    begin
+      fraAcceptCancel.Visible := false;
+
+      cboPdfType.Enabled := true;
+      cboXAxis.Enabled := not( unitsLocked );
+      cboYAxis.Enabled := not( unitsLocked );
+
+      updateFormFunctionParams();
+    end
+  ;
+
+
+  procedure TFrameFunctionParams2.reEnter( Sender: TObject);
+    var
+      winControl: TREEdit;
+    begin
+      winControl := sender as TREEdit;
+
+      if( winControl.ReadOnly ) then
+        exit
+      ;
+
+      if( nil <> @_setParentMenuItemsEnabled ) then
+        _setParentMenuItemsEnabled( false )
+      ;
+
+      if( fraAcceptCancel.Visible ) then
+        reChangeAccepted()
+      ;
+
+      dbcout( 're entered: ' + winControl.Name, DBSHOWMSG );
+
+      _tempVal := winControl.Text;
+
+      _currentControl := winControl;
+
+      showFraAcceptCancel( winControl );
+    end
+  ;
+
+
+  procedure TFrameFunctionParams2.reExit( Sender: TObject);
+    var
+      ctrl: TREEdit;
+    begin
+      ctrl := sender as TREEdit;
+
+      if( ctrl.ReadOnly ) then
+        exit
+      ;
+
+      if( fraAcceptCancel.Visible ) then
+        begin
+          hideFraAcceptCancel();
+          reChangeAccepted();
+        end
+      ;
+
+      dbcout( 'Exiting ' + ctrl.Name, DBSHOWMSG );
+      ctrl.Width := 113;
+
+      if( nil <> @_setParentMenuItemsEnabled ) then
+        _setParentMenuItemsEnabled( true )
+      ;
+    end
+  ;
+
+
+  procedure TFrameFunctionParams2.reChangeAccepted();
+    begin
+      if( nil <> _currentControl ) then
+        begin
+          dbcout( 'Change accepted in ' + _currentControl.Name, DBSHOWMSG );
+          reValueChanged( _currentControl );
+        end
+      ;
+
+      updateFormFunctionParams();
+    end
+  ;
+
+
+  procedure TFrameFunctionParams2.reChangeCanceled();
+    begin
+      dbcout( 'Cancel clicked', DBSHOWMSG );
+      dbcout( 'Change rejected in ' + _currentControl.Name, DBSHOWMSG );
+      _currentControl.Text := _tempVal;
+    end
+  ;
+
+
+  procedure TFrameFunctionParams2.fraAcceptCancelbtnAcceptClick( Sender: TObject );
+    begin
+      inherited;
+      dbcout( 'Accept clicked', DBSHOWMSG );
+      hideFraAcceptCancel();
+      dbcout( 'Accepting change in ' + _currentControl.Name, DBSHOWMSG );
+      reChangeAccepted();
+      _currentControl.Parent.SetFocus();
+    end
+  ;
+
+
+  procedure TFrameFunctionParams2.fraAcceptCancelbtnCancelClick( Sender: TObject );
+    begin
+      inherited;
+      hideFraAcceptCancel();
+      dbcout( 'Canceling change in ' + _currentControl.Name, DBSHOWMSG );
+      reChangeCanceled();
+      _currentControl.Parent.SetFocus();
+    end
+  ;
+
+
+  procedure TFrameFunctionParams2.reKeyUp( Sender: TObject; var Key: Word; Shift: TShiftState );
+    begin
+      //inherited;
+
+      if( (sender as TREEdit).ReadOnly ) then
+        exit
+      ;
+
+      if( 13 = key ) then
+        begin
+          _currentControl := sender as TREEdit;
+          dbcout( 'Enter in ' + _currentControl.Name, DBSHOWMSG );
+          fraAcceptCancelbtnAcceptClick( nil );
+        end
+      else if( 27 = key ) then
+        begin
+          _currentControl := sender as TREEdit;
+          dbcout( 'Cancel in ' + _currentControl.Name, DBSHOWMSG );
+          fraAcceptCancelbtnCancelClick( nil );
+        end
+      ;
+
+      inherited;
+    end
+  ;
+
+
+  procedure TFrameFunctionParams2.setUpdateParams( fn: TUpdateParamsEvent );
+    begin
+      _updateFunctionParams := fn;
+      updateFormFunctionParams();
+    end
+  ;
+
+
+  procedure TFrameFunctionParams2.setSetParentMenuItemsEnabled( fn: TObjFnVoid1Bool );
+    begin
+      _setParentMenuItemsEnabled := fn;
+      fraPointEditorGrid.setSetParentMenuItemsEnabled( fn );
+    end
+  ;
+
+
+  procedure TFrameFunctionParams2.updateFormFunctionParams();
+    var
+      fn: TChartFunction;
+    begin
+      fn := nil;
+      
+      case chartType of
+        CTPdf:
           begin
-
-          	// If yes, check every control in that group box...
-            obj := pnlParams.Controls[i] as TGroupbox;
-            for j := 0 to obj.controlCount-1 do
-              begin
-              	// ...and store values from each of the controls that's an editor box.
-                if( obj.controls[j] is TREEdit ) then reValueChanged( obj.Controls[j] );
-              end
+            fn := createPDF();
+            if( fn is TPdfContinuous ) then
+              btnConvert.Enabled := ( not( fraAcceptCancel.Visible ) and ( (fn as TPdfContinuous).canConvertToPiecewise ) )
+            else
+              btnConvert.Enabled := false
             ;
           end
-      end
-    ;
-  end
-;
+        ;
+        CTRel:
+          begin
+            fn := createRel();
+            btnConvert.Enabled := false;
+          end
+        ;
+        else
+          fn := nil
+        ;
+      end;
 
-
-
-procedure TFrameFunctionParams2.cboPdfTypeChange(Sender: TObject);
-	var
-  	key: string;
-  begin
-    key := cboPdfType.Items[cboPdfType.ItemIndex];
-
-  	showParamSet( key, editEnabled );
-
-    if( isNumber( _min ) ) then
-      begin
-        reMinTriang.Text := uiFloatToStr( _min );
-        reMinUniform.Text := uiFloatToStr( _min );
-        reMinBeta.Text := uiFloatToStr( _min );
-      end
-    else
-      begin
-        reMinTriang.Text := '';
-        reMinUniform.Text := '';
-        reMinBeta.Text := '';
-      end
-    ;
-
-    if( isNumber( _mode ) ) then
-      begin
-        reModeTriang.Text := uiFloatToStr( _mode );
-        reValuePoint.Text := uiFloatToStr( _mode );
-      end
-    else
-      begin
-        reModeTriang.Text := '';
-        reValuePoint.text := '';
-      end
-    ;
-
-    if( isNumber( _max ) ) then
-      begin
-        reMaxTriang.Text := uiFloatToStr( _max );
-        reMaxUniform.Text := uiFloatToStr( _max );
-        reMaxBeta.Text := uiFloatToStr( _max );
-      end
-    else
-      begin
-        reMaxTriang.Text := '';
-        reMaxUniform.Text := '';
-        reMaxBeta.Text := '';
-      end
-    ;
-
-    if( isNumber( _mean ) ) then
-      begin
-        reMeanGaussian.Text := uiFloatToStr( _mean );
-        reMeanExponential.Text := uiFloatToStr( _mean );
-      end
-    else
-      begin
-        reMeanGaussian.Text := '';
-        reMeanExponential.Text := '';
-      end
-    ;
-
-    if( isNumber( _stddev ) ) then
-      reStddevGaussian.Text := uiFloatToStr( _stddev ) else reStddevGaussian.Text := ''
-    ;
-
-    if( isNumber( _alpha ) ) then
-      begin
-        reAlpha1Beta.Text := uiFloatToStr( _alpha );
-        reAlphaGamma.Text := uiFloatToStr( _alpha );
-      end
-    else
-      begin
-        reAlpha1Beta.Text := '';
-        reAlphaGamma.Text := '';
-      end
-    ;
-
-    if( isNumber( _alpha2 ) ) then
-      reAlpha2Beta.Text := uiFloatToStr( _alpha2 )
-    else
-      reAlpha2Beta.Text := '';
-    ;
-
-    if( isNumber( _beta ) ) then
-      reBetaGamma.Text := uiFloatToStr( _beta )
-    else
-      reBetaGamma.Text := ''
-    ;
-
-
-    if( isNumber( _location ) ) then
-      begin
-        reLocationLogLogistic.Text := uiFloatToStr( _location );
-        reLocationLogistic.Text := uiFloatToStr( _location );
-      end
-    else
-      begin
-        reLocationLogLogistic.Text := '';
-        reLocationLogistic.Text := '';
-      end
-    ;
-
-    if( isNumber( _scale ) ) then
-      begin
-        reScaleLogistic.Text := uiFloatToStr( _scale );
-        reScaleLoglogistic.Text := uiFloatToStr( _scale );
-      end
-    else
-      begin
-        reScaleLogistic.Text := '';
-        reScaleLoglogistic.Text := '';
-      end
-    ;
-
-    if( isNumber( _shape ) ) then
-      reShapeLoglogistic.Text := uiFloatToStr( _shape ) else reShapeLoglogistic.Text := ''
-    ;
-
-    if( isNumber( _zeta ) ) then
-      reZetaLognormal2.Text := uiFloatToStr( _zeta ) else reZetaLognormal2.Text := ''
-    ;
-
-    if( isNumber( _sigma ) ) then
-      reSigmaLognormal2.Text := uiFloatToStr( _sigma ) else reSigmaLognormal2.Text := ''
-    ;
-
-    updateFormFunctionParams();
-    if( nil <> @_setParentMenuItemsEnabled ) then _setParentMenuItemsEnabled( true );
-  end
-;
-
-
-
-procedure TFrameFunctionParams2.showFraAcceptCancel( winControl: TWinControl );
-  begin
-    fraAcceptCancel.Parent := winControl.Parent;
-
-    winControl.Width := 65;
-    fraAcceptCancel.Top := winControl.Top;
-    fraAcceptCancel.Left := winControl.Left + winControl.Width + 1;
-
-    fraAcceptCancel.Visible := true;
-
-    cboPdfType.Enabled := false;
-    cboXAxis.Enabled := false;
-    cboYAxis.Enabled := false;
-    btnConvert.Enabled := false;
-  end
-;
-
-
-procedure TFrameFunctionParams2.hideFraAcceptCancel();
-  begin
-    fraAcceptCancel.Visible := false;
-
-    cboPdfType.Enabled := true;
-    cboXAxis.Enabled := not( unitsLocked );
-    cboYAxis.Enabled := not( unitsLocked );
-
-    updateFormFunctionParams();
-  end
-;
-
-
-procedure TFrameFunctionParams2.reEnter( Sender: TObject);
-  var
-    winControl: TREEdit;
-  begin
-    if( nil <> @_setParentMenuItemsEnabled ) then
-      _setParentMenuItemsEnabled( false )
-    ;
-
-    if( fraAcceptCancel.Visible ) then
-      reChangeAccepted()
-    ;
-
-    winControl := sender as TREEdit;
-
-    dbcout( 're entered: ' + winControl.Name, DBFRAMEFUNCTIONPARAMS2 );
-
-    _tempVal := winControl.Text;
-
-    _currentControl := winControl;
-
-    //if( not( _foo ) ) then
-      showFraAcceptCancel( winControl )
-    (*
-    else
-      begin
-        fraAcceptCancel.Visible := false;
-        //cboPdfType.SetFocus();
-        pnlCbos.SetFocus();
-        _foo := false;
-      end
-    *)
-    ;
-  end
-;
-
-
-procedure TFrameFunctionParams2.reExit( Sender: TObject);
-  var
-    ctrl: TREEdit;
-  begin
-    ctrl := sender as TREEdit;
-    dbcout( 'Exiting ' + ctrl.Name, DBFRAMEFUNCTIONPARAMS2 );
-    ctrl.Width := 113;
-
-    if( nil <> @_setParentMenuItemsEnabled ) then
-      _setParentMenuItemsEnabled( true )
-    ;
-  end
-;
-
-
-procedure TFrameFunctionParams2.reChangeAccepted();
-  begin
-
-    if( nil <> _currentControl ) then
-      begin
-        dbcout( 'Change accepted in ' + _currentControl.Name, DBFRAMEFUNCTIONPARAMS2 );
-        reValueChanged( _currentControl );
-      end
-    ;
-
-    updateFormFunctionParams();
-  end
-;
-
-
-procedure TFrameFunctionParams2.reChangeCanceled();
-  begin
-    dbcout( 'Cancel clicked', DBFRAMEFUNCTIONPARAMS2 );
-    dbcout( 'Change rejected in ' + _currentControl.Name, DBFRAMEFUNCTIONPARAMS2 );
-    _currentControl.Text := _tempVal;
-  end
-;
-
-
-procedure TFrameFunctionParams2.fraAcceptCancelbtnAcceptClick( Sender: TObject );
-  begin
-    inherited;
-    dbcout( 'Accept clicked', DBFRAMEFUNCTIONPARAMS2 );
-    hideFraAcceptCancel();
-    dbcout( 'Accepting change in ' + _currentControl.Name, DBFRAMEFUNCTIONPARAMS2 );
-    reChangeAccepted();
-    _currentControl.Parent.SetFocus();
-  end
-;
-
-
-procedure TFrameFunctionParams2.fraAcceptCancelbtnCancelClick( Sender: TObject );
-  begin
-    inherited;
-    hideFraAcceptCancel();
-    dbcout( 'Canceling change in ' + _currentControl.Name, DBFRAMEFUNCTIONPARAMS2 );
-    reChangeCanceled();
-    _currentControl.Parent.SetFocus();
-  end
-;
-
-
-procedure TFrameFunctionParams2.reKeyUp( Sender: TObject; var Key: Word; Shift: TShiftState );
-  begin
-    if( 13 = key ) then
-      begin
-        _currentControl := sender as TREEdit;
-        dbcout( 'Enter in ' + _currentControl.Name, DBFRAMEFUNCTIONPARAMS2 );
-        fraAcceptCancelbtnAcceptClick( nil );
-      end
-    else if( 27 = key ) then
-      begin
-        _currentControl := sender as TREEdit;
-        dbcout( 'Cancel in ' + _currentControl.Name, DBFRAMEFUNCTIONPARAMS2 );
-        fraAcceptCancelbtnCancelClick( nil );
-      end
-    ;
-
-    inherited;
-  end
-;
-
-
-procedure TFrameFunctionParams2.setUpdateParams( fn: TUpdateParamsEvent );
-  begin
-    _updateFunctionParams := fn;
-    updateFormFunctionParams();
-  end
-;
-
-
-procedure TFrameFunctionParams2.setSetParentMenuItemsEnabled( fn: TObjFnVoid1Bool );
-  begin
-    _setParentMenuItemsEnabled := fn;
-    fraPointEditorGrid.setSetParentMenuItemsEnabled( fn );
-  end
-;
-
-
-(*
-procedure TFrameFunctionParams2.cboPdfTypeChange(Sender: TObject);
-  begin
-    inherited;
-    updateFormFunctionParams();
-    if( nil <> @_setParentMenuItemsEnabled ) then _setParentMenuItemsEnabled( true );
-  end
-;
-*)
-
-procedure TFrameFunctionParams2.updateFormFunctionParams();
-  var
-    fn: TChartFunction;
-  begin
-    case chartType of
-      CTPdf:
-        begin
-          fn := createPDF();
-          btnConvert.Enabled := ( not( fraAcceptCancel.Visible ) and ( (fn as TPdf).canConvertToPiecewise ) );
-        end
+      dbcout( 'Trying to debug function:', DBSHOWMSG );
+      if( DBSHOWMSG and ( nil <> fn ) ) then
+        fn.debug()
       ;
-      CTRel:
-        begin
-          fn := createRel();
-          btnConvert.Enabled := false;
-        end
+      dbcout( 'Done debugging', DBSHOWMSG );
+
+      if( nil <> @_updateFunctionParams ) then
+        _updateFunctionParams( self, fn )
       ;
-      else
-        fn := nil
-      ;
-    end;
 
-    dbcout( 'Trying to debug function:', DBFRAMEFUNCTIONPARAMS2 );
-    if( DBFRAMEFUNCTIONPARAMS2 ) then if( nil <> fn ) then fn.debug();
-    dbcout( 'Done debugging', DBFRAMEFUNCTIONPARAMS2 );
-
-    if( nil <> @_updateFunctionParams ) then _updateFunctionParams( self, fn );
-
-    freeAndNil( fn );
-  end
-;
+      freeAndNil( fn );
+    end
+  ;
 
 
 
@@ -1336,8 +1784,7 @@ procedure TFrameFunctionParams2.updateFormFunctionParams();
     var
       rel: TRelFunction;
     begin
-      rel := TRelFunction.create( _tempPoints, xUnits, yUnits );
-      rel.name := getName();
+      rel := TRelFunction.create( _tempPointsRelFunction, xUnits, yUnits );
       result := rel;
     end
   ;
@@ -1361,20 +1808,27 @@ procedure TFrameFunctionParams2.updateFormFunctionParams();
     var
       i: integer;
     begin
-      setLength( _tempPoints, fraPointEditorGrid.stgPoints.RowCount - 1 ); // subtract 1 for the header row
+      if( _isPiecewisePdf ) then
+        setLength( _tempPointsPiecewisePdf, fraPointEditorGrid.stgPoints.RowCount - 1 ) // subtract 1 for the header row
+      else if( _isRelFunction ) then
+        setLength( _tempPointsRelFunction, fraPointEditorGrid.stgPoints.RowCount - 1 )
+      else if( _isHistogramPdf ) then
+        setLength( _tempPointsHistogramPdf, fraPointEditorGrid.stgPoints.RowCount - 1 )
+      else
+        // do nothing
+      ;
 
       if( CTRel = _chartType ) then
         begin
           // Check min and max constraints.
-
-          for i := 0 to length( _tempPoints ) - 1 do
+          for i := 0 to length( _tempPointsRelFunction ) - 1 do
             begin
               if
-                ( myStrToFloat( fraPointEditorGrid.stgPoints.Cells[1, i+1] ) < minY )
+                ( uiStrToFloat( fraPointEditorGrid.stgPoints.Cells[1, i+1] ) < minY )
               or
-                ( ( myStrToFloat( fraPointEditorGrid.stgPoints.Cells[1, i+1] ) > maxY ) and ( maxY > 0.0 ) )
+                ( ( uiStrToFloat( fraPointEditorGrid.stgPoints.Cells[1, i+1] ) > maxY ) and ( maxY > 0.0 ) )
               or
-                ( myStrToFloat( fraPointEditorGrid.stgPoints.Cells[0, i+1] ) < 0 ) // all X values must be 0 or greater
+                ( uiStrToFloat( fraPointEditorGrid.stgPoints.Cells[0, i+1] ) < 0 ) // all X values must be 0 or greater
               then
                 begin
                   msgOK(
@@ -1393,42 +1847,72 @@ procedure TFrameFunctionParams2.updateFormFunctionParams();
         end
       ;
 
-      for i := 0 to length( _tempPoints ) - 1 do
+      if( _isPiecewisePdf ) then
         begin
-          _tempPoints[i].x := myStrToFloat( fraPointEditorGrid.stgPoints.Cells[0, i+1] );
-          _tempPoints[i].y := myStrToFloat( fraPointEditorGrid.stgPoints.Cells[1, i+1] );
-
-          if( CTRel = _chartType ) then
+          for i := 0 to length( _tempPointsPiecewisePdf ) - 1 do
             begin
+              _tempPointsPiecewisePdf[i].x := uiStrToFloat( fraPointEditorGrid.stgPoints.Cells[0, i+1] );
+              _tempPointsPiecewisePdf[i].y := uiStrToFloat( fraPointEditorGrid.stgPoints.Cells[1, i+1] );
+            end
+          ;
+        end
+      else if( _isHistogramPdf ) then
+        begin
+          for i := 0 to length( _tempPointsHistogramPdf ) - 1 do
+            begin
+              _tempPointsHistogramPdf[i].range := uiStrToFloat( fraPointEditorGrid.stgPoints.Cells[0, i+1] );
+              _tempPointsHistogramPdf[i].count := uiStrToFloat( fraPointEditorGrid.stgPoints.Cells[1, i+1] );
+            end
+          ;
+        end
+      else if( _isRelFunction ) then
+        begin
+          for i := 0 to length( _tempPointsRelFunction ) - 1 do
+            begin
+              _tempPointsRelFunction[i].x := uiStrToFloat( fraPointEditorGrid.stgPoints.Cells[0, i+1] );
+              _tempPointsRelFunction[i].y := uiStrToFloat( fraPointEditorGrid.stgPoints.Cells[1, i+1] );
+
               // Check X restrictions for REL functions
-              if( myStrToFloat( fraPointEditorGrid.stgPoints.Cells[0, i+1] ) < 0 ) then
+              if( uiStrToFloat( fraPointEditorGrid.stgPoints.Cells[0, i+1] ) < 0 ) then
                 begin
-                  _tempPoints[i].x := 0;
+                  _tempPointsRelFunction[i].x := 0;
                   fraPointEditorGrid.stgPoints.Cells[0, i+1] := uiFloatToStr( 0 );
                 end
               ;
 
               // Check Y restrictions for REL functions
-              if( myStrToFloat( fraPointEditorGrid.stgPoints.Cells[1, i+1] ) < minY ) then
+              if( uiStrToFloat( fraPointEditorGrid.stgPoints.Cells[1, i+1] ) < minY ) then
                 begin
-                  _tempPoints[i].y := minY;
+                  _tempPointsRelFunction[i].y := minY;
                   fraPointEditorGrid.stgPoints.Cells[1, i+1] := uiFloatToStr( minY );
                 end
-              else if( ( myStrToFloat( fraPointEditorGrid.stgPoints.Cells[1, i+1] ) > maxY ) and ( maxY > 0.0 ) ) then
+              else if( ( uiStrToFloat( fraPointEditorGrid.stgPoints.Cells[1, i+1] ) > maxY ) and ( maxY > 0.0 ) ) then
                 begin
-                  _tempPoints[i].y := maxY;
+                  _tempPointsRelFunction[i].y := maxY;
                   fraPointEditorGrid.stgPoints.Cells[1, i+1] := uiFloatToStr( maxY );
                 end
               ;
             end
           ;
         end
+      else
+        // Do nothing
       ;
 
       if( CTPdf = _chartType ) then
         begin
-          if( TPdfPiecewise.standardize( _tempPoints ) ) then
-            fraPointEditorGrid.setPoints( _tempPoints )
+          if( _isPiecewisePdf ) then
+            begin
+              if( TPdfPiecewise.standardize( _tempPointsPiecewisePdf ) ) then
+                fraPointEditorGrid.setPointsPiecewisePdf( _tempPointsPiecewisePdf )
+              ;
+            end
+          else if( _isHistogramPdf ) then
+            begin
+              if( TPdfHistogram.standardize( _tempPointsHistogramPdf ) ) then
+                fraPointEditorGrid.setPointsHistogramPdf( _tempPointsHistogramPdf )
+              ;
+            end
           ;
         end
       ;
@@ -1449,15 +1933,15 @@ procedure TFrameFunctionParams2.updateFormFunctionParams();
 
       // If the user clicked cancel, restore the points
       // the way the were before they were messed with.
+      // Then set the appropriate points (checkTempPoints
+      // handles this, too).
       checkTempPoints();
-      fraPointEditorGrid.setPoints( _tempPoints );
     end
   ;
 
 
   procedure TFrameFunctionParams2.fraPointEditorGridstgPointsEnter( Sender: TObject );
     begin
-      inherited;
       fraPointEditorGrid.stgPointsEnter( sender );
 
       cboPdfType.Enabled := false;
@@ -1469,189 +1953,301 @@ procedure TFrameFunctionParams2.updateFormFunctionParams();
 
   procedure TFrameFunctionParams2.checkTempPoints();
     begin
-      if( ( CTPdf = _chartType ) and ( 3 > length( _tempPoints ) ) ) then
+      if( CTPdf = _chartType ) then
         begin
-          // Create some fake points
-          setLength( _tempPoints, 3 );
+          // Create some fake points for the appropriate distribution type
+          if( _isHistogramPdf and ( 2 > length( _tempPointsHistogramPdf ) )  ) then
+            begin
+              setLength( _tempPointsHistogramPdf, 3 );
 
-          _tempPoints[0].x := 0.0;
-          _tempPoints[0].y := 0.0;
+              _tempPointsHistogramPdf[0].range := 0.0;
+              _tempPointsHistogramPdf[0].count := 3;
 
-          _tempPoints[1].x := 3.0;
-          _tempPoints[1].y := 0.4;
+              _tempPointsHistogramPdf[1].range := 1.0;
+              _tempPointsHistogramPdf[1].count := 1;
 
-          _tempPoints[2].x := 5.0;
-          _tempPoints[2].y := 0.0;
+              _tempPointsHistogramPdf[2].range := 2.0;
+              _tempPointsHistogramPdf[2].count := 0;
+            end
+          else if( _isPiecewisePdf and ( 3 > length( _tempPointsPiecewisePdf ) ) ) then
+            begin
+              setLength( _tempPointsPiecewisePdf, 3 );
+
+              _tempPointsPiecewisePdf[0].x := 0.0;
+              _tempPointsPiecewisePdf[0].y := 0.0;
+
+              _tempPointsPiecewisePdf[1].x := 3.0;
+              _tempPointsPiecewisePdf[1].y := 0.4;
+
+              _tempPointsPiecewisePdf[2].x := 5.0;
+              _tempPointsPiecewisePdf[2].y := 0.0;
+            end
+          ;
         end
       else if( CTRel = _chartType ) then
         begin
-          if( 0 = length( _tempPoints ) ) then
+          if( 0 = length( _tempPointsRelFunction ) ) then
             begin
               // Create some fake points
-              setLength( _tempPoints, 3 );
+              setLength( _tempPointsRelFunction, 3 );
 
-              _tempPoints[0].x := 0.0;
-              _tempPoints[0].y := 100.0;
+              _tempPointsRelFunction[0].x := 0.0;
+              _tempPointsRelFunction[0].y := 100.0;
 
-              _tempPoints[1].x := 3.5;
-              _tempPoints[1].y := 50.0;
+              _tempPointsRelFunction[1].x := 3.5;
+              _tempPointsRelFunction[1].y := 50.0;
 
-              _tempPoints[2].x := 7.0;
-              _tempPoints[2].y := 25.0;
+              _tempPointsRelFunction[2].x := 7.0;
+              _tempPointsRelFunction[2].y := 25.0;
             end
-          else if( 1 = length( _tempPoints ) ) then
+          else if( 1 = length( _tempPointsRelFunction ) ) then
             begin
-              setLength( _tempPoints, 2 );
+              setLength( _tempPointsRelFunction, 2 );
 
-              _tempPoints[1].x := _tempPoints[0].x + 1;
-              _tempPoints[1].y := _tempPoints[0].y;
+              _tempPointsRelFunction[1].x := _tempPointsRelFunction[0].x + 1;
+              _tempPointsRelFunction[1].y := _tempPointsRelFunction[0].y;
+            end
+          else
+            // 2 or more points are fine: don't do anything.
+          ;
+        end
+      ;
+
+      if( _isRelFunction ) then
+        fraPointEditorGrid.setPointsRelFunction( _tempPointsRelFunction )
+      else if( _isPiecewisePdf ) then
+        fraPointEditorGrid.setPointsPiecewisePdf( _tempPointsPiecewisePdf )
+      else if( _isHistogramPdf ) then
+        fraPointEditorGrid.setPointsHistogramPdf( _tempPointsHistogramPdf )
+      else
+        // Do nothing
+      ;
+    end
+  ;
+
+  procedure TFrameFunctionParams2.setPoints( pnt: RPointArray );
+    var
+      i: integer;
+    begin
+      if( _isRelFunction ) then
+        begin
+          setLength( _tempPointsRelFunction, 0 );
+          _tempPointsRelFunction := pnt;
+          fraPointEditorGrid.setPointsRelFunction( _tempPointsRelFunction );
+        end
+      else if( _isPiecewisePdf ) then
+        begin
+          setLength( _tempPointsPiecewisePdf, 0 );
+          _tempPointsPiecewisePdf := pnt;
+          fraPointEditorGrid.setPointsPiecewisePdf( _tempPointsPiecewisePdf );
+        end
+      else if( _isHistogramPdf ) then
+        begin
+          setLength( _tempPointsHistogramPdf, 0 );
+          setLength( _tempPointsHistogramPdf, length( pnt ) );
+          for i := 0 to length( pnt ) - 1 do
+            begin
+              _tempPointsHistogramPdf[i].range := pnt[i].x;
+              _tempPointsHistogramPdf[i].count := pnt[i].y;
+              _tempPointsHistogramPdf[i].density := -1.0;
             end
           ;
+          fraPointEditorGrid.setPointsHistogramPdf( _tempPointsHistogramPdf );
+        end
+      else
+        // Do nothing
+      ;
+    end
+  ;
 
-          // 2 or more points are fine: don't do anything.
+
+  procedure TFrameFunctionParams2.fraPointEditorGridstgPointsKeyDown(
+        Sender: TObject;
+        var Key: Word;
+        Shift: TShiftState
+      );
+    begin
+      inherited;
+      
+      dbcout( key, DBSHOWMSG );
+
+      // FIX ME??? For some reason, keyDown doesn't seem to work in fraPointEditorGrid,
+      // even though that's where the tab and down arrow key handling should logically take place.
+      // These keys are handled here as a work-around.
+      if( key in [9, 40] ) then
+        begin
+          if( ( fraPointEditorGrid.stgPoints.Col = fraPointEditorGrid.stgPoints.ColCount - 1 ) and ( fraPointEditorGrid.stgPoints.Row = fraPointEditorGrid.stgPoints.RowCount - 1 ) ) then
+            begin
+              fraPointEditorGrid.stgPoints.RowCount := fraPointEditorGrid.stgPoints.RowCount + 1;
+              if( 1 < fraPointEditorGrid.stgPoints.RowCount ) then
+                begin
+                  fraPointEditorGrid.stgPoints.Cells[0, fraPointEditorGrid.stgPoints.RowCount - 1 ] := uiFloatToStr( uiStrToFloat( fraPointEditorGrid.stgPoints.Cells[0, fraPointEditorGrid.stgPoints.RowCount - 2 ] ) + 1 );
+                  fraPointEditorGrid.stgPoints.Cells[1, fraPointEditorGrid.stgPoints.RowCount - 1 ] := fraPointEditorGrid.stgPoints.Cells[1, fraPointEditorGrid.stgPoints.RowCount - 2 ];
+                end
+              ;
+            end
+          ;
+        end
+      else if( 13 = key ) then
+        begin
+          fraPointEditorGrid.SetFocus();
+          fraPointEditorGridbtnOKClick( nil );
+        end
+      else if( 27 = key ) then
+        begin
+          fraPointEditorGrid.SetFocus();
+          fraPointEditorGridbtnCancelClick( nil );
         end
       ;
     end
   ;
 
-procedure TFrameFunctionParams2.setPoints( pnt: RPointArray );
-  begin
-    setLength( _tempPoints, 0 );
-    _tempPoints := pnt;
-    fraPointEditorGrid.setPoints( _tempPoints );
-  end
-;
 
-
-procedure TFrameFunctionParams2.fraPointEditorGridstgPointsKeyDown(
-    Sender: TObject;
-    var Key: Word;
-    Shift: TShiftState
-  );
-begin
-  dbcout( key, DBFRAMEFUNCTIONPARAMS2 );
-  inherited;
-
-  dbcout2( 'Key down: ' + intToStr( Key ) );
-
-  // FIX ME??? For some reason, keyDown doesn't seem to work in fraPointEditorGrid,
-  // even though that's where the tab and down arrow key handling should logically take place.
-  // These keys are handled here as a work-around.
-  if( key in [9, 40] ) then
+  procedure TFrameFunctionParams2.setChildrenReadOnly( ctrl: TWinControl );
+  	var
+    	i: integer;
+      wc: TWinControl;
     begin
-      if( ( fraPointEditorGrid.stgPoints.Col = fraPointEditorGrid.stgPoints.ColCount - 1 ) and ( fraPointEditorGrid.stgPoints.Row = fraPointEditorGrid.stgPoints.RowCount - 1 ) ) then
-        begin
-          dbcout2( 'Tabbed from last cell' );
-          fraPointEditorGrid.stgPoints.RowCount := fraPointEditorGrid.stgPoints.RowCount + 1;
-          if( 1 < fraPointEditorGrid.stgPoints.RowCount ) then
+      if( ctrl is TREEdit ) then
+        ( ctrl as TREEdit ).ReadOnly := _isReadOnly
+      (*
+      else if( ctrl is TGroupBox ) then
+        // do nothing
+      else if( ctrl is TPanel ) then
+        // do nothing
+      else
+    	  ctrl.enabled := not( _isReadOnly )
+      *)
+      ;
+
+    	for i := 0 to ctrl.controlCount - 1 do
+      	begin
+          if( ctrl.controls[i] is TREEdit ) then
+            ( ctrl.Controls[i] as TREEdit ).readOnly := _isReadOnly
+          (*
+          else if( ctrl is TComboBox ) then
+            ( ctrl.Controls[i] as TComboBox ).Enabled := not( _isReadOnly )
+          else if( ctrl is TPanel ) then
+            // do nothing
+          else
+        	  ctrl.Controls[i].Enabled := not( _isReadOnly )
+          *)
+          ;
+
+          if( ctrl.Controls[i] is TWinControl ) then
             begin
-              fraPointEditorGrid.stgPoints.Cells[0, fraPointEditorGrid.stgPoints.RowCount - 1 ] := uiFloatToStr( myStrToFloat( fraPointEditorGrid.stgPoints.Cells[0, fraPointEditorGrid.stgPoints.RowCount - 2 ] ) + 1 );
-              fraPointEditorGrid.stgPoints.Cells[1, fraPointEditorGrid.stgPoints.RowCount - 1 ] := fraPointEditorGrid.stgPoints.Cells[1, fraPointEditorGrid.stgPoints.RowCount - 2 ];
+              wc := ctrl.Controls[i] as TWinControl;
+              setChildrenReadOnly( wc );
             end
           ;
         end
       ;
     end
-  else if( 13 = key ) then
-    begin
-      fraPointEditorGrid.SetFocus();
-      fraPointEditorGridbtnOKClick( nil );
-    end
-  else if( 27 = key ) then
-    begin
-      fraPointEditorGrid.SetFocus();
-      fraPointEditorGridbtnCancelClick( nil );
-    end
   ;
-end;
 
 
-procedure TFrameFunctionParams2.setReadOnly( val: boolean );
-  begin
-    _isReadOnly := val;
+  procedure TFrameFunctionParams2.setReadOnly( val: boolean );
+    begin
+      _isReadOnly := val;
 
-    setChildrenEnabled( self, not( _isReadOnly ), true );
+      setChildrenReadOnly( self );
 
-    // Even though children are enabled, these two controls shouldn't be.
-    fraPointEditorGrid.btnOK.Enabled := false;
-    fraPointEditorGrid.btnCancel.Enabled := false;
+      fraAcceptCancel.Enabled := not( _isReadOnly );
+      cboPdfType.Enabled := not( _isReadOnly );
 
-    // If units are locked, these shouldn't be enabled either.
-    // Otherwise the user can mess with stuff...
-    if( unitsLocked ) then
-      begin
-        cboXAxis.Enabled := false;
-        cboYAxis.Enabled := false;
-      end
-    ;
-  end
-;
+      // Even though children might be enabled, these controls shouldn't be.
+      fraPointEditorGrid.btnOK.Enabled := false;
+      fraPointEditorGrid.btnCancel.Enabled := false;
 
+      // Even though children might be disabled, these controls shouldn't be.
+      lblPdfType.Enabled := true;
+      lblXAxis.Enabled := true;
+      lblYAxis.Enabled := true;
 
-function TFrameFunctionParams2.getReadOnly(): boolean;
-  begin
-    result := _isReadOnly;
-  end
-;
-
-procedure TFrameFunctionParams2.setChartType( const val: TChartType );
-  begin
-    _chartType := val;
-    
-    case val of
-      CTRel:
+      // If units are locked, these shouldn't be enabled either.
+      // Otherwise the user can mess with stuff...
+      if( unitsLocked ) then
         begin
-          showParamSet( tr( 'Piecewise (general)' ), not( _isReadOnly ) );  // For reasons that aren't entirely clear, 'Piecewise (general)' does need to be translated...
-
-          lblYAxis.Visible := true;
-          lblYAxis.Top := lblPdfType.Top;
-          lblYAxis.Left := lblPdfType.Left;
-
-          cboYAxis.Visible := true;
-          cboYAxis.Top := cboPdfType.Top;
-          cboYAxis.Left := cboPdfType.Left;
-
-          lblPdfType.Visible := false;
-          cboPdfType.Visible := false;
+          cboXAxis.Enabled := false;
+          cboYAxis.Enabled := false;
         end
-      ;
       else
         begin
-          showParamSet( '(Unspecified)', not( _isReadOnly ) );
-
-          lblYAxis.Visible := false;
-          cboYAxis.Visible := false;
-
-          lblPdfType.Visible := true;
-          cboPdfType.Visible := true;
+          cboXAxis.Enabled := not( _isReadOnly );
+          cboYAxis.Enabled := not( _isReadOnly );
         end
       ;
-    end;
-  end
-;
+    end
+  ;
 
 
-function TFrameFunctionParams2.getYUnits(): TChartUnitType;
-  begin
-    result := TChartUnitType( cboYAxis.ItemIndex + 1 );
-  end
-;
+  function TFrameFunctionParams2.getReadOnly(): boolean;
+    begin
+      result := _isReadOnly;
+    end
+  ;
 
 
-procedure TFrameFunctionParams2.setYUnits( val: TChartUnitType );
-  begin
-    cboYAxis.ItemIndex := ord(val) - 1;
-  end
-;
+  procedure TFrameFunctionParams2.setChartType( const val: TChartType );
+    begin
+      _chartType := val;
+    
+      case val of
+        CTRel:
+          begin
+            //showParamSet( tr( 'Piecewise (general)' ), not( _isReadOnly ) );  // For reasons that aren't entirely clear, 'Piecewise (general)' does need to be translated...
+            showParamSet( tr( 'Relational' ), not( _isReadOnly ) );
+
+            lblYAxis.Visible := true;
+            lblYAxis.Top := lblPdfType.Top;
+            lblYAxis.Left := lblPdfType.Left;
+
+            cboYAxis.Visible := true;
+            cboYAxis.Top := cboPdfType.Top;
+            cboYAxis.Left := cboPdfType.Left;
+
+            lblPdfType.Visible := false;
+            cboPdfType.Visible := false;
+          end
+        ;
+        else
+          begin
+            showParamSet( '(Unspecified)', not( _isReadOnly ) );
+
+            lblYAxis.Visible := false;
+            cboYAxis.Visible := false;
+
+            lblPdfType.Visible := true;
+            cboPdfType.Visible := true;
+          end
+        ;
+      end;
+    end
+  ;
 
 
-procedure TFrameFunctionParams2.setUnitsLocked( val: boolean );
-  begin
-    _unitsLocked := val;
-    cboXAxis.Enabled := not( _unitsLocked );
-    cboYAxis.Enabled := not( _unitsLocked );
-  end
-;
+  function TFrameFunctionParams2.getYUnits(): TChartUnitType;
+    begin
+      result := chartUnitTypeFromString( self.cboYAxis.Items[ self.cboYAxis.itemIndex ] );
+    end
+  ;
+
+
+  procedure TFrameFunctionParams2.setYUnits( val: TChartUnitType );
+    begin
+      cboYAxis.ItemIndex := cboYAxis.Items.IndexOf( chartUnitTypeAsString( val ) );
+    end
+  ;
+
+
+  procedure TFrameFunctionParams2.setUnitsLocked( val: boolean );
+    begin
+      _unitsLocked := val;
+      cboXAxis.Enabled := not( _unitsLocked );
+      cboYAxis.Enabled := not( _unitsLocked );
+    end
+  ;
+
 
   procedure TFrameFunctionParams2.btnEditPiecewiseClick(Sender: TObject);
     begin
@@ -1668,9 +2264,15 @@ procedure TFrameFunctionParams2.setUnitsLocked( val: boolean );
     	cboPdfType.Enabled := val;
 
       if( unitsLocked ) then
-      	cboXAxis.Enabled := false
+        begin
+      	  cboXAxis.Enabled := false;
+          cboYAxis.Enabled := false;
+        end
       else
-      	cboXAxis.Enabled := val
+        begin
+      	  cboXAxis.Enabled := val;
+          cboYAxis.Enabled := val;
+        end
       ;
 
       for i := 0 to _paramSetsList.count-1 do
@@ -1690,41 +2292,16 @@ procedure TFrameFunctionParams2.setUnitsLocked( val: boolean );
   ;
 
 
-	function TFrameFunctionParams2.getName(): string;
-		begin
-			result := '';
-		end
-	;
-
-
-	procedure TFrameFunctionParams2.copyPDF( pdf: TPdf; enableEdit: boolean = false );
-  	var
-      triang: TPdfTriangular;
-      point: TPdfPoint;
-      gauss: TPdfGaussian;
-      pieces: TPdfPiecewise;
-      uniform: TPdfUniform;
-      beta: TPdfBeta;
-      betaPERT: TPdfBetaPert;
-      gamma: TPdfGamma;
-      weibull: TPdfWeibull;
-      exp: TPdfExponential;
-      pearson: TPdfPearson5;
-      logistic: TPdfLogistic;
-      loglogistic: TPdfLoglogistic;
-      lognormal: TPdfLogNormal;
+	procedure TFrameFunctionParams2.drawPDF( pdf: TPdf; const xUnits: TChartUnitType; enableEdit: boolean = false );
+    var
+      pdfType: TPdfType;
   	begin
-      if( nil = pdf ) then exit;
-
-//      grp := nil;
-
       //if( enableEdit ) then cboPdfType.Enabled := true;
-      
-    	if( pdf.pdfType = PdfUndefined ) then
-        begin
-          showParamSet( '(Unspecified)', false );
-          exit;
-        end
+
+      if( nil = pdf ) then
+        pdfType := PdfUndefined
+      else
+        pdfType := pdf.pdfType
       ;
 
       if( editEnabled ) then
@@ -1744,303 +2321,438 @@ procedure TFrameFunctionParams2.setUnitsLocked( val: boolean );
       	setupForEdit()
       ;
 
-      cboPdfType.ItemIndex := cboPdfTypeItemFromProdType( pdf.pdfType );
-      cboXAxis.ItemIndex := ord( pdf.xUnits ) - 1; // Remember the offset!
-
+      cboPdfType.ItemIndex := cboPdfTypeItemFromProdType( pdfType );
+      cboXAxis.ItemIndex := cboXAxis.Items.IndexOf( chartUnitTypeAsString( xUnits ) );
       resetStoredValues();
 
-    	case pdf.pdfType of
-      	PdfTriangular:
-        	begin
-         		showParamSet( 'Triangular', false );
-//            grp := grpTriang;
-
-            triang := TPdfTriangular( pdf );
-
-            _min := triang.min;
-            reMinTriang.Text := uiFloatToStr( triang.min );
-            _mode := triang.mode;
-            reModeTriang.Text := uiFloatToStr( triang.mode );
-            _max := triang.max;
-            reMaxTriang.Text := uiFloatToStr( triang.max );
-
-            setLength( _tempPoints, 0 );
+    	case pdfType of
+        // Undefined type
+        //---------------
+        PdfUndefined:
+          begin
+            showParamSet( '(Unspecified)', false );
           end
         ;
-        PdfPoint:
+        // Continuous types
+        //-----------------
+        PdfBeta:
         	begin
-         		showParamSet( 'Fixed value', false );
-//            grp := grpPoint;
+          	showParamSet( 'Beta', false );
 
-            point := TPdfPoint( pdf );
+            _min := (pdf as TPdfBeta).min;
 
-            _mode := point.value;
-            reValuePoint.text := uiFloatToStr( point.value );
+             reMinBeta.Text := uiFloatToStr( _min );
+            _max := (pdf as TPdfBeta).max;
+            reMaxBeta.Text := uiFloatToStr( _max );
+            _alpha := (pdf as TPdfBeta).alpha1;
+            reAlpha1Beta.Text := uiFloatToStr( _alpha );
+            _alpha2 := (pdf as TPdfBeta).alpha2;
+            reAlpha2Beta.Text := uiFloatToStr( _alpha2 );
+          end
+        ;
+        PdfBetaPERT:
+        	begin
+          	showParamSet( 'BetaPERT', false );
+
+            _min := (pdf as TPdfBetaPERT).min;
+            reMinTriang.Text := uiFloatToStr( _min );
+            _mode := (pdf as TPdfBetaPERT).mode;
+            reModeTriang.Text := uiFloatToStr( _mode );
+            _max := (pdf as TPdfBetaPERT).max;
+            reMaxTriang.Text := uiFloatToStr( _max );
+          end
+        ;
+        PdfExponential:
+        	begin
+          	showParamSet( 'Exponential', false );
+
+            _mean := (pdf as TPdfExponential).mean;
+            reMeanExponential.Text := uiFloatToStr( _mean );
+          end
+        ;
+        PdfGamma:
+        	begin
+          	showParamSet( 'Gamma', false );
+
+            _alpha := (pdf as TPdfGamma).alpha;
+            reAlphaGamma.Text := uiFloatToStr( _alpha );
+            _beta := (pdf as TPdfGamma).beta;
+            reBetaGamma.Text := uiFloatToStr( _beta );
           end
         ;
       	PdfGaussian:
         	begin
           	showParamSet( 'Gaussian (normal)', false );
-//            grp := grpGaussian;
 
-            gauss := TPdfGaussian( pdf );
+            _mean := (pdf as TPdfGaussian).mean;
+            reMeanGaussian.Text := uiFloatToStr( _mean );
+            _stddev := (pdf as TPdfGaussian).stddev;
+            reStddevGaussian.Text := uiFloatToStr( _stddev );
+          end
+        ;
+        PdfHistogram:
+          begin
+            _tempPointsHistogramPdf := (pdf as TPdfHistogram).createHistogramPointArray();
+            showParamSet( tr( 'Histogram' ), false );
+          end
+        ;
+        PdfInverseGaussian:
+          begin
+          	showParamSet( 'Inverse Gaussian', false );
 
-            _mean := gauss.mean;
-            reMeanGaussian.Text := uiFloatToStr( gauss.mean );
-            _stddev := gauss.stddev;
-            reStddevGaussian.Text := uiFloatToStr( gauss.stddev );
+            _mean := (pdf as TPdfInverseGaussian).mean;
+            reMeanInvGaussian.Text := uiFloatToStr( _mean );
+            _shape := (pdf as TPdfInverseGaussian).shape;
+            reShapeInvGaussian.Text := uiFloatToStr( _shape );
+          end
+        ;
+        PdfLogistic:
+        	begin
+          	showParamSet( 'Logistic', false );
+
+            _location := (pdf as TPdfLogistic).location;
+            reLocationLogistic.Text := uiFloatToStr( _location );
+            _scale := (pdf as TPdfLogistic).scale;
+            reScaleLogistic.Text := uiFloatToStr( _scale );
+          end
+        ;
+        PdfLogLogistic:
+        	begin
+          	showParamSet( 'Loglogistic', false );
+
+            _location := (pdf as TPdfLogLogistic).location;
+            reLocationLoglogistic.Text := uiFloatToStr( _location );
+            _scale := (pdf as TPdfLogLogistic).scale;
+            reScaleLoglogistic.Text := uiFloatToStr( _scale );
+            _shape := (pdf as TPdfLogLogistic).shape;
+            reShapeLoglogistic.Text := uiFloatToStr( _shape );
+          end
+        ;
+        PdfLognormal:
+        	begin
+          	showParamSet( 'Lognormal', false );
+
+            _mean := (pdf as TPdfLognormal).mean;
+            reMeanGaussian.Text := uiFloatToStr( _mean );
+            _stddev := (pdf as TPdfLognormal).stddev;
+            reStddevGaussian.Text := uiFloatToStr( _stddev );
+
+            _zeta := (pdf as TPdfLognormal).zeta;
+            reZetaLognormal2.Text := uiFloatToStr( _zeta );
+            _sigma := (pdf as TPdfLognormal).sigma;
+            reSigmaLognormal2.Text := uiFloatToStr( _sigma );
+          end
+        ;
+        PdfPareto:
+          begin
+            showParamSet( 'Pareto', false );
+
+            _theta := (pdf as TPdfPareto).theta;
+            reThetaPareto.Text := uiFloatToStr( _theta );
+            _a := (pdf as TPdfPareto).a;
+            reAPareto.Text := uiFloatToStr( _a );
+          end
+        ;
+        PdfPearson5:
+        	begin
+          	showParamSet( 'Pearson 5', false );
+
+            _alpha := (pdf as TPdfPearson5).alpha;
+            reAlphaGamma.Text := uiFloatToStr( _alpha );
+            _beta := (pdf as TPdfPearson5).beta;
+            reBetaGamma.Text := uiFloatToStr( _beta );
           end
         ;
         PdfPiecewise:
         	begin
             // Build the function before showing the parameter set,
             // to allow the various pieces to get the point values right.
-            pieces := TPdfPiecewise( pdf );
-
-            if( 3 > length( pieces.pointArray ) ) then
+            if( 3 > (pdf as TPdfPiecewise).pointCount ) then
               begin
-                _tempPoints := nil;
+                _tempPointsPiecewisePdf := nil;
 
-                setLength( _tempPoints, 3 );
+                setLength( _tempPointsPiecewisePdf, 3 );
 
-                _tempPoints[0].x := 0.0;
-                _tempPoints[0].y := 0.0;
+                _tempPointsPiecewisePdf[0].x := 0.0;
+                _tempPointsPiecewisePdf[0].y := 0.0;
 
-                _tempPoints[1].x := 3.0;
-                _tempPoints[1].y := 0.4;
+                _tempPointsPiecewisePdf[1].x := 3.0;
+                _tempPointsPiecewisePdf[1].y := 0.4;
 
-                _tempPoints[2].x := 5.0;
-                _tempPoints[2].y := 0.0;
+                _tempPointsPiecewisePdf[2].x := 5.0;
+                _tempPointsPiecewisePdf[2].y := 0.0;
               end
             else
-              _tempPoints := pieces.pointArray
+              _tempPointsPiecewisePdf := (pdf as TPdfPiecewise).createRecordPointArray()
             ;
 
-          	showParamSet( tr( 'Piecewise (general)' ), false ); // For reasons that aren't entirely clear, 'Piecewise (general)' does need to be translated.
-//            grp := grpPiecewise;
+            // For reasons that aren't entirely clear, 'Piecewise (general)' does need to be translated.
+            // The others don't.
+          	showParamSet( tr( 'Piecewise (general)' ), false );
           end
         ;
-      PdfUniform:
+        PdfPoint:
+        	begin
+         		showParamSet( 'Fixed value', false );
+
+            _mode := (pdf as TPdfPoint).value;
+            reValuePoint.text := uiFloatToStr( _mode );
+          end
+        ;
+      	PdfTriangular:
+        	begin
+         		showParamSet( 'Triangular', false );
+
+            _min := (pdf as TPdfTriangular).min;
+            reMinTriang.Text := uiFloatToStr( _min );
+            _mode := (pdf as TPdfTriangular).mode;
+            reModeTriang.Text := uiFloatToStr( _mode );
+            _max := (pdf as TPdfTriangular).max;
+            reMaxTriang.Text := uiFloatToStr( _max );
+
+            //setLength( _tempPoints, 0 );
+          end
+        ;
+        PdfUniform:
         	begin
           	showParamSet( 'Uniform', false );
-//            grp := grpUniform;
 
-            uniform := TPdfUniform( pdf );
-
-            _min := uniform.min;
-            reMinUniform.Text := uiFloatToStr( uniform.min );
-            _max := uniform.max;
-            reMaxUniform.Text := uiFloatToStr( uniform.max );
+            _min := (pdf as TPdfUniform).min;
+            reMinUniform.Text := uiFloatToStr( _min );
+            _max := (pdf as TPdfUniform).max;
+            reMaxUniform.Text := uiFloatToStr( _max );
           end
         ;
-      PdfBetaPERT:
-        	begin
-          	showParamSet( 'BetaPERT', false );
-//            grp := grpTriang;
-
-            betaPERT := TPdfBetaPERT( pdf );
-
-            _min := betaPERT.min;
-            reMinTriang.Text := uiFloatToStr( betaPERT.min );
-            _mode := betaPERT.mode;
-            reModeTriang.Text := uiFloatToStr( betaPERT.mode );
-            _max := betaPERT.max;
-            reMaxTriang.Text := uiFloatToStr( betaPERT.max );
-          end
-        ;
-      PdfGamma:
-        	begin
-          	showParamSet( 'Gamma', false );
-//            grp := grpGamma;
-
-            gamma := TPdfGamma( pdf );
-
-            _alpha := gamma.alpha;
-            reAlphaGamma.Text := uiFloatToStr( gamma.alpha );
-            _beta := gamma.beta;
-            reBetaGamma.Text := uiFloatToStr( gamma.beta );
-          end
-        ;
-      PdfWeibull:
+        PdfWeibull:
         	begin
           	showParamSet( 'Weibull', false );
-//            grp := grpGamma;
 
-            weibull := TPdfWeibull( pdf );
-
-            _alpha := weibull.alpha;
-            reAlphaGamma.Text := uiFloatToStr( weibull.alpha );
-            _beta := weibull.beta;
-            reBetaGamma.Text := uiFloatToStr( weibull.beta );
+            _alpha := (pdf as TPdfWeibull).alpha;
+            reAlphaGamma.Text := uiFloatToStr( _alpha );
+            _beta := (pdf as TPdfWeibull).beta;
+            reBetaGamma.Text := uiFloatToStr( _beta );
           end
         ;
-      PdfExponential:
-        	begin
-          	showParamSet( 'Exponential', false );
- //           grp := grpExponential;
 
-            exp := TPdfExponential( pdf );
+        // Discrete types
+        //---------------
+        PdfBernoulli:
+          begin
+            showParamSet( 'Bernoulli', false );
 
-            _mean := exp.mean;
-            reMeanExponential.Text := uiFloatToStr( exp.mean );
+            _p := (pdf as TPdfBernoulli).p;
+            rePBernoulli.Text := uiFloatToStr( _p );
           end
         ;
-      PdfPearson5:
-        	begin
-          	showParamSet( 'Gamma', false );
-//            grp := grpGamma;
+        PdfBinomial:
+          begin
+            showParamSet( 'Binomial', false );
 
-            pearson := TPdfPearson5( pdf );
-
-            _alpha := pearson.alpha;
-            reAlphaGamma.Text := uiFloatToStr( pearson.alpha );
-            _beta := pearson.beta;
-            reBetaGamma.Text := uiFloatToStr( pearson.beta );
+            _n := (pdf as TPdfBinomial).n;
+            reNBinomial.Text := intToStr( _n );
+            _p := (pdf as TPdfBinomial).p;
+            rePBinomial.Text := uiFloatToStr( _p );
           end
         ;
-      PdfLogistic:
-        	begin
-          	showParamSet( 'Logistic', false );
-//            grp := grpLogistic;
+        PdfDiscreteUniform:
+          begin
+            showParamSet( 'Discrete uniform', false );
 
-            logistic := TPdfLogistic( pdf );
-
-            _location := logistic.location;
-            reLocationLogistic.Text := uiFloatToStr( logistic.location );
-            _scale := logistic.scale;
-            reScaleLogistic.Text := uiFloatToStr( logistic.scale );
+            _dMin := trunc( (pdf as TPdfDiscreteUniform).min );
+            reMinDiscreteUniform.Text := intToStr( _dMin );
+            _dMax := trunc( (pdf as TPdfDiscreteUniform).max );
+            reMaxDiscreteUniform.Text := intToStr( _dMax );
           end
         ;
-      PdfLogLogistic:
-        	begin
-          	showParamSet( 'Loglogistic', false );
-//            grp := grpLogLogistic;
+        PdfHypergeometric:
+          begin
+            showParamSet( 'Hypergeometric', false );
 
-            loglogistic := TPdfLogLogistic( pdf );
-
-            _location := loglogistic.location;
-            reLocationLoglogistic.Text := uiFloatToStr( loglogistic.location );
-            _scale := loglogistic.scale;
-            reScaleLoglogistic.Text := uiFloatToStr( loglogistic.scale );
-            _shape := loglogistic.shape;
-            reShapeLoglogistic.Text := uiFloatToStr( loglogistic.shape );
+            _m := (pdf as TPdfHypergeometric).m;
+            reMHypergeometric.Text := intToStr( _m );
+            _d := (pdf as TPdfHypergeometric).d;
+            reDHypergeometric.text := intToStr( _d );
+            _n := (pdf as TPdfHypergeometric).n;
+            reNHypergeometric.text := intToStr( _n );
           end
         ;
-      PdfLognormal:
-        	begin
-          	showParamSet( 'Lognormal', false );
-//            grp := grpGaussian;
+        PdfNegativeBinomial:
+          begin
+            showParamSet( 'Negative binomial', false );
 
-            lognormal := TPdfLognormal( pdf );
-
-            _mean := lognormal.mean;
-            reMeanGaussian.Text := uiFloatToStr( lognormal.mean );
-            _stddev := lognormal.stddev;
-            reStddevGaussian.Text := uiFloatToStr( lognormal.stddev );
-
-            _zeta := lognormal.zeta;
-            reZetaLognormal2.Text := uiFloatToStr( lognormal.zeta );
-            _sigma := lognormal.sigma;
-            reSigmaLognormal2.Text := uiFloatToStr( lognormal.sigma );
+            _p := (pdf as TPdfNegativeBinomial).p;
+            rePNegBinomial.Text := uiFloatToStr( _p );
+            _s := (pdf as TPdfNegativeBinomial).s;
+            reSNegBinomial.Text := intToStr( _s );
           end
         ;
-      PdfBeta:
-        	begin
-          	showParamSet( 'Beta', false );
-//            grp := grpBeta;
+        PdfPoisson:
+          begin
+            showParamSet( 'Poisson', false );
 
-            beta := TPdfBeta( pdf );
-            _min := beta.min;
-
-             reMinBeta.Text := uiFloatToStr( beta.min );
-            _max := beta.max;
-            reMaxBeta.Text := uiFloatToStr( beta.max );
-            _alpha := beta.alpha1;
-            reAlpha1Beta.Text := uiFloatToStr( beta.alpha1 );
-            _alpha2 := beta.alpha2;
-            reAlpha2Beta.Text := uiFloatToStr( beta.alpha2 );
+            _mean := (pdf as TPdfPoisson).mean;
+            reMeanExponential.Text := uiFloatToStr( _mean );
           end
         ;
-      else
-      	showMessage( 'Unrecognized PDF type in TFrameFunctionParamsBase.setPDF()' );
+        else
+      	  showMessage( tr('Unrecognized PDF type in TFrameFunctionParamsBase.setPDF()') )
+        ;
       end;
 
       if( enableEdit ) then
-        begin
-      	  setEditControlsEnabled( true );
-          //if( nil <> grp ) then grp.SetFocus();
-          //cboPdfType.SetFocus();
-        end
+        setEditControlsEnabled( true )
       else
       	setEditControlsEnabled( false )
       ;
-
-
     end
   ;
 	
 	
   function TFrameFunctionParams2.createPDF(): TPdf;
     var
+      itemStr: string;
       pdf: TPdf;
       logn: TPdfLognormal;
     begin
-      case cboPdfType.itemIndex of
-        //0:  pdf := TPdf.create();
-        1:  pdf := TPdfPoint.create( mode, xUnits );
-        2:  pdf := TPdfUniform.create( min, max, xUnits ) ;
-        3:  pdf := TPdfTriangular.create( min, mode, max, xUnits );
-        4:  pdf := TPdfPiecewise.create( _tempPoints, xUnits );
-        5:  pdf := TPdfGaussian.create( mean, stddev, xUnits );
-        6:  pdf := TPdfLognormal.create( mean, stddev, xUnits );
-        7:
-          begin
-            logn := TPdfLognormal.create();
-            logn.xUnits := xUnits;
-            logn.zeta := zeta;
-            logn.sigma := sigma;
-            pdf := logn;
-          end
-        ;
-        8:  pdf := TPdfGamma.create( alpha, beta, xUnits );
-        9:  pdf := TPdfWeibull.create( alpha, beta, xUnits );
-        10: pdf := TPdfPearson5.create( alpha, beta, xUnits );
-        11: pdf := TPdfBeta.create( alpha, alpha2, min, max, xUnits );
-        12: pdf := TPdfBetaPERT.create( min, mode, max, xUnits );
-        13: pdf := TPdfLogistic.create( location, scale, xUnits );
-        14: pdf := TPdfLoglogistic.create( location, scale, shape, xUnits );
-        15:  pdf := TPdfExponential.create( mean, xUnits );
-        else
-          raise exception.create( 'Unsupported pdf type ' + intToStr( cboPdfType.ItemIndex ) + ' in TFrameFunctionParams2.createPDF()' )
-        ;
-      end;
+      pdf := nil;
 
-      pdf.name := getName();
+      itemStr := cboPdfType.Items[ cboPdfType.itemIndex ];
+
+      if(  tr( '(Unspecified)' ) = itemStr ) then
+        // Don't do anything
+
+      // Continuous types
+      else if( tr( 'Beta' ) = itemStr ) then
+        pdf := TPdfBeta.create( alpha, alpha2, min, max, xUnits )
+      else if( tr( 'BetaPERT' ) = itemStr ) then
+        pdf := TPdfBetaPERT.create( min, mode, max, xUnits )
+      else if( tr( 'Exponential' ) = itemStr ) then
+        pdf := TPdfExponential.create( mean, xUnits )
+      else if( tr( 'Fixed value' ) = itemStr ) then
+        pdf := TPdfPoint.create( mode, xUnits )
+      else if( tr( 'Gamma' ) = itemStr ) then
+        pdf := TPdfGamma.create( alpha, beta, xUnits )
+      else if( tr( 'Gaussian (normal)' ) = itemStr ) then
+        pdf := TPdfGaussian.create( mean, stddev, xUnits )
+      else if( tr( 'Histogram' ) = itemStr ) then
+        pdf := TPdfHistogram.create( _tempPointsHistogramPdf, xUnits )
+      else if( tr( 'Inverse Gaussian' ) = itemStr ) then
+        pdf := TPdfInverseGaussian.create( mean, shape, xUnits )
+      else if( tr( 'Logistic' ) = itemStr ) then
+        pdf := TPdfLogistic.create( location, scale, xUnits )
+      else if( tr( 'Loglogistic' ) = itemStr ) then
+        pdf := TPdfLoglogistic.create( location, scale, shape, xUnits )
+      else if( tr( 'Lognormal' ) = itemStr ) then
+        pdf := TPdfLognormal.create( mean, stddev, xUnits )
+      else if( tr( 'Lognormal (2nd form)' ) = itemStr ) then
+        begin
+          logn := TPdfLognormal.create();
+          logn.xUnits := xUnits;
+          logn.zeta := zeta;
+          logn.sigma := sigma;
+          pdf := logn;
+        end
+      else if( tr( 'Pareto' ) = itemStr ) then
+        pdf := TPdfPareto.create( theta, a, xUnits )
+      else if( tr( 'Pearson 5' ) = itemStr ) then
+        pdf := TPdfPearson5.create( alpha, beta, xUnits )
+      else if( tr( 'Piecewise (general)' ) = itemStr ) then
+        pdf := TPdfPiecewise.create( _tempPointsPiecewisePdf, xUnits )
+      else if( tr( 'Triangular' ) = itemStr ) then
+        pdf := TPdfTriangular.create( min, mode, max, xUnits )
+      else if( tr( 'Uniform' ) = itemStr ) then
+        pdf := TPdfUniform.create( min, max, xUnits )
+      else if( tr( 'Weibull' ) = itemStr ) then
+        pdf := TPdfWeibull.create( alpha, beta, xUnits )
+
+      // Discrete types
+      else if( tr( 'Bernoulli' ) = itemStr ) then
+        pdf := TPdfBernoulli.create( p, xUnits )
+      else if( tr( 'Binomial' ) = itemStr ) then
+        pdf := TPdfBinomial.create( n, p, xUnits )
+      else if( tr( 'Discrete uniform' ) = itemStr ) then
+        pdf := TPdfDiscreteUniform.create( dMin, dMax, xUnits )
+      else if( tr( 'Hypergeometric' ) = itemStr ) then
+        pdf := TPdfHypergeometric.create( n, d, m, xUnits )
+      else if( tr( 'Negative binomial' ) = itemStr ) then
+        pdf := TPdfNegativeBinomial.create( s, p, xUnits )
+      else if( tr( 'Poisson' ) = itemStr ) then
+        pdf := TPdfPoisson.create( mean, xUnits )
+      else
+        raise exception.create( 'Unsupported pdf type (' + itemStr + ') in TFrameFunctionParams2.createPDF()' )
+      ;
 
       result := pdf;
     end
   ;
 
+
   function TFrameFunctionParams2.pdfTypeFromCboPdfTypeItem(): TPdfType;
+    var
+      itemStr: string;
     begin
-      case cboPdfType.itemIndex of
-        0:    result := PdfUndefined;
-        1:    result := PdfPoint;
-        2:    result := PdfUniform;
-        3:    result := PdfTriangular;
-        4:    result := PdfPiecewise;
-        5:    result := PdfGaussian;
-        6, 7: result := PdfLognormal;
-        8:    result := PdfGamma;
-        9:    result := PdfWeibull;
-        10:   result := PdfPearson5;
-        11:   result := PdfBeta;
-        12:   result := PdfBetaPERT;
-        13:   result := PdfLogistic;
-        14:   result := PdfLogLogistic;
-        15:   result := PdfExponential;
-        else result := PdfUndefined;
-      end;
+      itemStr := cboPdfType.Items[ cboPdfType.itemIndex ];
+
+      if(  tr( '(Unspecified)' ) = itemStr ) then
+        result := PdfUndefined
+
+      // Continuous types
+      else if( tr( 'Beta' ) = itemStr ) then
+        result := PdfBeta
+      else if( tr( 'BetaPERT' ) = itemStr ) then
+        result := PdfBetaPERT
+      else if( tr( 'Exponential' ) = itemStr ) then
+        result := PdfExponential
+      else if( tr( 'Fixed value' ) = itemStr ) then
+        result := PdfPoint
+      else if( tr( 'Gamma' ) = itemStr ) then
+        result := PdfGamma
+      else if( tr( 'Gaussian (normal)' ) = itemStr ) then
+        result := PdfGaussian
+      else if( tr( 'Histogram' ) = itemStr ) then
+        result := PdfHistogram
+      else if( tr( 'Inverse Gaussian' ) = itemStr ) then
+        result := PdfInverseGaussian
+      else if( tr( 'Logistic' ) = itemStr ) then
+        result := PdfLogistic
+      else if( tr( 'Loglogistic' ) = itemStr ) then
+        result := PdfLogLogistic
+      else if( tr( 'Lognormal' ) = itemStr ) then
+        result := PdfLognormal
+      else if( tr( 'Lognormal (2nd form)' ) = itemStr ) then
+        result := PdfLognormal
+      else if( tr( 'Pareto' ) = itemStr ) then
+        result := PdfPareto
+      else if( tr( 'Pearson 5' ) = itemStr ) then
+        result := PdfPearson5
+      else if( tr( 'Piecewise (general)' ) = itemStr ) then
+        result := PdfPiecewise
+      else if( tr( 'Triangular' ) = itemStr ) then
+        result := PdfTriangular
+      else if( tr( 'Uniform' ) = itemStr ) then
+        result := PdfUniform
+      else if( tr( 'Weibull' ) = itemStr ) then
+        result := PdfWeibull
+
+      // Discrete types
+      else if( tr( 'Bernoulli' ) = itemStr ) then
+        result := PdfBernoulli
+      else if( tr( 'Binomial' ) = itemStr ) then
+        result := PdfBinomial
+      else if( tr( 'Discrete uniform' ) = itemStr ) then
+        result := PdfDiscreteUniform
+      else if( tr( 'Hypergeometric' ) = itemStr ) then
+        result :=  PdfHypergeometric
+      else if( tr( 'Negative binomial' ) = itemStr ) then
+        result := PdfNegativeBinomial
+      else if( tr( 'Poisson' ) = itemStr ) then
+        result := PdfPoisson
+      else
+        begin
+          raise exception.create( 'Unsupported pdf type (' + itemStr + ') in TFrameFunctionParams2.createPDF()' );
+          result := PdfUndefined
+        end
+      ;
     end
   ;
 
@@ -2048,28 +2760,40 @@ procedure TFrameFunctionParams2.setUnitsLocked( val: boolean );
   function TFrameFunctionParams2.cboPdfTypeItemFromProdType( pdfType: TPdfType ): integer;
     begin
       case pdfType of
-        PdfUndefined: result := 0;
-        PdfPoint: result := 1;
-        PdfUniform: result := 2;
-        PdfTriangular: result := 3;
-        PdfPiecewise: result := 4;
-        PdfGaussian: result := 5;
-        PdfLognormal: result := 6;
-        //PdfLognormal2: result := 7; // This shouldn't happen.  The second form of the Lognormal is now indistinguishable from the main form.
-        PdfGamma: result := 8;
-        PdfWeibull: result := 9;
-        PdfPearson5: result := 10;
-        PdfBeta: result := 11;
-        PdfBetaPERT: result := 12;
-        PdfLogistic: result := 13;
-        PdfLogLogistic: result := 14;
-        PdfExponential: result := 15;
-      else
-        begin
-          raise exception.create( 'Illegal value (' + intToStr( ord(pdfType) ) + ') in TFrameFunctionParamsBase.cboPdfTypeItemFromProdType' );
-          result := -1;
-        end
-      ;
+        PdfUndefined: result := cboPdfType.Items.IndexOf( tr( '(Unspecified)' ) );
+
+        // Continuous types
+        PdfBeta: result := cboPdfType.Items.IndexOf( tr( 'Beta' ) );
+        PdfBetaPERT: result := cboPdfType.Items.IndexOf( tr( 'BetaPERT' ) );
+        PdfExponential: result := cboPdfType.Items.IndexOf( tr( 'Exponential' ) );
+        PdfPoint: result := cboPdfType.Items.IndexOf( tr( 'Fixed value' ) );
+        PdfGamma: result := cboPdfType.Items.IndexOf( tr( 'Gamma' ) );
+        PdfGaussian: result := cboPdfType.Items.IndexOf( tr( 'Gaussian (normal)' ) );
+        PdfHistogram: result := cboPdfType.Items.IndexOf( tr( 'Histogram' ) );
+        PdfInverseGaussian: result := cboPdfType.Items.IndexOf( tr( 'Inverse Gaussian' ) );
+        PdfLogistic: result := cboPdfType.Items.IndexOf( tr( 'Logistic' ) );
+        PdfLogLogistic: result := cboPdfType.Items.IndexOf( tr( 'Loglogistic' ) );
+        PdfLognormal: result := cboPdfType.Items.IndexOf( tr( 'Lognormal' ) );
+        PdfPareto: result := cboPdfType.Items.IndexOf( tr( 'Pareto' ) );
+        PdfPearson5: result := cboPdfType.Items.IndexOf( tr( 'Pearson 5' ) );
+        PdfPiecewise: result := cboPdfType.Items.IndexOf( tr( 'Piecewise (general)' ) );
+        PdfTriangular: result := cboPdfType.Items.IndexOf( tr( 'Triangular' ) );
+        PdfUniform: result := cboPdfType.Items.IndexOf( tr( 'Uniform' ) );
+        PdfWeibull: result := cboPdfType.Items.IndexOf( tr( 'Weibull' ) );
+
+        //Discrete types
+        PdfBernoulli: result := cboPdfType.Items.IndexOf( tr( 'Bernoulli' ) );
+        PdfBinomial: result := cboPdfType.Items.IndexOf( tr( 'Binomial' ) );
+        PdfDiscreteUniform: result := cboPdfType.Items.IndexOf( tr( 'Discrete uniform' ) );
+        PdfHypergeometric: result := cboPdfType.Items.IndexOf( tr( 'Hypergeometric' ) );
+        PdfNegativeBinomial: result := cboPdfType.Items.IndexOf( tr( 'Negative binomial' ) );
+        PdfPoisson: result := cboPdfType.Items.IndexOf( tr( 'Poisson' ) );
+        else
+          begin
+            raise exception.create( 'Invalid value (' + intToStr( ord(pdfType) ) + ') in TFrameFunctionParamsBase.cboPdfTypeItemFromProdType' );
+            result := -1;
+          end
+        ;
       end;
     end
   ;
@@ -2078,14 +2802,14 @@ procedure TFrameFunctionParams2.setUnitsLocked( val: boolean );
 
 	function TFrameFunctionParams2.getXUnits(): TChartUnitType;
   	begin
-    	result := TChartUnitType( cboXAxis.ItemIndex + 1 );
+    	result := chartUnitTypeFromString( self.cboXAxis.Items[ self.cboXAxis.itemIndex ] );
     end
   ;
 
 
   procedure TFrameFunctionParams2.setXUnits( val: TChartUnitType );
   	begin
-    	cboXAxis.ItemIndex := ord(val) - 1;
+    	cboXAxis.ItemIndex := cboXAxis.Items.IndexOf( chartUnitTypeAsString( val ) );
     end
   ;
 
@@ -2103,6 +2827,15 @@ procedure TFrameFunctionParams2.setUnitsLocked( val: boolean );
   procedure TFrameFunctionParams2.setShape( val: double ); begin _shape := val; end;
   procedure TFrameFunctionParams2.setZeta( val: double ); begin _zeta := val; end;
   procedure TFrameFunctionParams2.setSigma( val: double ); begin _sigma := val; end;
+  procedure TFrameFunctionParams2.setN( val: integer ); begin _n := val; end;
+  procedure TFrameFunctionParams2.setP( val: double ); begin _p := val; end;
+  procedure TFrameFunctionParams2.setM( val: integer ); begin _m := val; end;
+  procedure TFrameFunctionParams2.setD( val: integer ); begin _d := val; end;
+  procedure TFrameFunctionParams2.setDMin( val: integer ); begin _dmin := val; end;
+  procedure TFrameFunctionParams2.setDMax( val: integer ); begin _dmax := val; end;
+  procedure TFrameFunctionParams2.setS( val: integer ); begin _s := val; end;
+  procedure TFrameFunctionParams2.setTheta( val: double ); begin _theta := val; end;
+  procedure TFrameFunctionParams2.setA( val: double ); begin _a := val; end;
 
   function TFrameFunctionParams2.getMin(): double; begin Result := _min; end;
   function TFrameFunctionParams2.getMode(): double; begin Result := _mode; end;
@@ -2117,38 +2850,19 @@ procedure TFrameFunctionParams2.setUnitsLocked( val: boolean );
   function TFrameFunctionParams2.getShape(): double; begin result := _shape; end;
   function TFrameFunctionParams2.getZeta(): double; begin result := _zeta; end;
   function TFrameFunctionParams2.getSigma(): double; begin result := _sigma; end;
+  function TFrameFunctionParams2.getN(): integer; begin result := _n; end;
+  function TFrameFunctionParams2.getP(): double; begin result := _p; end;
+  function TFrameFunctionParams2.getM(): integer; begin result := _m; end;
+  function TFrameFunctionParams2.getD(): integer; begin result := _d; end;
+  function TFrameFunctionParams2.getDMin(): integer; begin result := _dmin; end;
+  function TFrameFunctionParams2.getDMax(): integer; begin result := _dmax; end;
+  function TFrameFunctionParams2.getS(): integer; begin result := _s; end;
+  function TFrameFunctionParams2.getTheta(): double; begin result := _theta; end;
+  function TFrameFunctionParams2.getA(): double; begin result := _a; end;
 
   function TFrameFunctionParams2.getUnitsLocked(): boolean; begin result := _unitsLocked; end;
-  //procedure TFrameFunctionParams2.setUnitsLocked( val: boolean ); begin _unitsLocked := val; end;
-
-  function TFrameFunctionParams2.getNameLocked(): boolean; begin result := _nameLocked; end;
-  procedure TFrameFunctionParams2.setNameLocked( val: boolean ); begin _nameLocked := val; end;
-
-  function TFrameFunctionParams2.getNameVis(): boolean; begin result := _nameVis; end;
-  procedure TFrameFunctionParams2.setNameVis( val: boolean ); begin _nameVis := val; end;
 
   function TFrameFunctionParams2.getEditEnabled(): boolean; begin result := _editEnabled; end;
 
-  // This function deals with a little bug in TREEdit.
-  procedure TFrameFunctionParams2.rleKeyDown( Sender: TObject; var Key: Word; Shift: TShiftState );
-    var
-      rle: TREEdit;
-    begin
-      rle := sender as TREEdit;
-      if( rle.SelLength = length( rle.Text ) ) then rle.Text := '';
-    end
-  ;
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 	
 end.
