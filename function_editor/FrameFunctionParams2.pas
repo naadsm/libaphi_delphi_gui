@@ -4,8 +4,8 @@ unit FrameFunctionParams2;
 FrameFunctionParams2.pas/dfm
 ----------------------------
 Begin: 2005/11/10
-Last revision: $Date: 2011-10-28 17:15:22 $ $Author: areeves $
-Version number: $Revision: 1.26.6.7 $
+Last revision: $Date: 2013-06-27 19:11:23 $ $Author: areeves $
+Version number: $Revision: 1.23.4.10 $
 Project: APHI Delphi Library for Simulation Modeling
 Website: http://www.naadsm.org/opensource/libaphi/
 Author: Aaron Reeves <Aaron.Reeves@ucalgary.ca>

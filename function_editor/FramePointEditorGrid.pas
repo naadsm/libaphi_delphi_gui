@@ -4,8 +4,8 @@ unit FramePointEditorGrid;
 FramePointEditorGrid.pas/dfm
 ----------------------------
 Begin: 2005/11/10
-Last revision: $Date: 2011-10-28 17:15:22 $ $Author: areeves $
-Version number: $Revision: 1.9.10.3 $
+Last revision: $Date: 2013-06-27 19:11:23 $ $Author: areeves $
+Version number: $Revision: 1.9.4.5 $
 Project: APHI Delphi Library for Simulation Modeling
 Website: http://www.naadsm.org/opensource/libaphi/
 Author: Aaron Reeves <Aaron.Reeves@ucalgary.ca>

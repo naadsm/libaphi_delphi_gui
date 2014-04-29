@@ -2,8 +2,8 @@
 FrameArrayHistogram.pas/dfm
 ----------------------------
 Begin: 2005/08/01
-Last revision: $Date: 2011-02-15 00:13:54 $ $Author: areeves $
-Version number: $Revision: 1.8.12.6 $
+Last revision: $Date: 2013-06-27 19:11:22 $ $Author: areeves $
+Version number: $Revision: 1.8.6.8 $
 Project: APHI Delphi Library for Simulation Modeling
 Website: http://www.naadsm.org/opensource/libaphi/
 Author: Aaron Reeves <Aaron.Reeves@ucalgary.ca>

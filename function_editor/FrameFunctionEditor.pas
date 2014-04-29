@@ -4,8 +4,8 @@ unit FrameFunctionEditor;
 FrameFunctionEditor.pas/dfm
 ---------------------------
 Begin: 2006/01/04
-Last revision: $Date: 2011-10-28 17:15:22 $ $Author: areeves $
-Version number: $Revision: 1.24.6.7 $
+Last revision: $Date: 2013-06-27 19:11:22 $ $Author: areeves $
+Version number: $Revision: 1.19.4.12 $
 Project: APHI Delphi Library for Simulation Modeling
 Website: http://www.naadsm.org/opensource/libaphi/
 Author: Aaron Reeves <Aaron.Reeves@ucalgary.ca>
