@@ -8,7 +8,7 @@ Last revision: $Date: 2011-07-13 03:41:46 $ $Author: areeves $
 Version number: $Revision: 1.19 $
 Project: APHI Delphi Library for Simulation Modeling
 Website: http://www.naadsm.org/opensource/libaphi/
-Author: Aaron Reeves <Aaron.Reeves@ucalgary.ca>
+Author: Aaron Reeves <aaron.reeves@naadsm.org>
 --------------------------------------------------
 Copyright (C) 2005 - 2011 Colorado State University
 

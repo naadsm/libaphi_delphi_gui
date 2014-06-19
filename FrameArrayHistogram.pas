@@ -6,7 +6,7 @@ Last revision: $Date: 2013-06-27 19:11:22 $ $Author: areeves $
 Version number: $Revision: 1.8.6.8 $
 Project: APHI Delphi Library for Simulation Modeling
 Website: http://www.naadsm.org/opensource/libaphi/
-Author: Aaron Reeves <Aaron.Reeves@ucalgary.ca>
+Author: Aaron Reeves <aaron.reeves@naadsm.org>
 --------------------------------------------------
 Copyright (C) 2005 - 2011 Animal Population Health Institute, Colorado State University
 
